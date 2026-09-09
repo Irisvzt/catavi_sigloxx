@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooperativa Multiactiva Siglo XX Catavi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; background:#04080f; }
+
+#cc { width:100%; height:100vh; position:relative; background:#04080f; overflow:hidden; }
+#tc { width:100%; height:100%; display:block; }
+
+.ui-overlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; display:flex; flex-direction:column; align-items:center;
+}
+.header-block { text-align:center; margin-top:28px; }
+.header-block .sup { font-family:'Courier New',monospace; font-size:11px; letter-spacing:4px; color:#4fa3e8; text-transform:uppercase; margin-bottom:6px; }
+.header-block h1 { font-family:'Georgia',serif; font-size:28px; font-weight:700; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,0.9); line-height:1.25; }
+.header-block h1 span { color:#4fa3e8; }
+.header-block .tag { font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:2px; margin-top:6px; font-family:'Courier New',monospace; }
+
+@keyframes float-a { 0%,100%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-13px) rotate(5deg);} }
+@keyframes float-b { 0%,100%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-10px) rotate(-4deg);} }
+@keyframes float-c { 0%,100%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-16px) rotate(7deg);} }
+@keyframes glow-pulse { 0%,100%{filter:drop-shadow(0 0 5px rgba(79,163,232,0.4));} 50%{filter:drop-shadow(0 0 16px rgba(79,163,232,0.9));} }
+@keyframes fade-in { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+@keyframes spin-slow { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+@keyframes pulse-ring { 0%,100%{opacity:0.3;transform:scale(1);} 50%{opacity:0.7;transform:scale(1.06);} }
+
+.side-deco {
+  position:absolute; top:50%; transform:translateY(-50%);
+  pointer-events:none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+}
+.side-deco.left  { left:50px; }
+.side-deco.right { right:50px; }
+.side-deco.hidden { opacity:0; pointer-events:none; }
+.side-deco.left.hidden  { transform:translateY(-50%) translateX(-20px); }
+.side-deco.right.hidden { transform:translateY(-50%) translateX(20px); }
+
+.ficon-btn {
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  cursor:pointer; pointer-events:all;
+  background:none; border:none; padding:0;
+}
+.ficon-btn:nth-child(1) { animation: float-a 4.2s ease-in-out infinite; }
+.ficon-btn:nth-child(2) { animation: float-b 3.6s ease-in-out infinite 0.9s; }
+.ficon-btn:nth-child(3) { animation: float-c 4.8s ease-in-out infinite 1.8s; }
+.ficon-btn svg { width:64px; height:64px; animation: glow-pulse 3s ease-in-out infinite; transition: transform 0.2s; }
+.ficon-btn:nth-child(1) svg { animation-delay:0s; }
+.ficon-btn:nth-child(2) svg { animation-delay:1s; }
+.ficon-btn:nth-child(3) svg { animation-delay:2s; }
+.ficon-btn:hover svg { transform: scale(1.13); }
+.ficon-btn:active svg { transform: scale(0.96); }
+.ficon-btn .flabel { font-family:'Courier New',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(79,163,232,0.65); transition: color 0.2s; white-space:nowrap; }
+.ficon-btn:hover .flabel { color:#88ccff; }
+.ficon-btn.active .flabel { color:#4fa3e8; font-weight:700; }
+.ficon-btn.active svg { filter: drop-shadow(0 0 18px rgba(79,163,232,1)); }
+.fdivider { width:1px; height:28px; background:linear-gradient(to bottom, transparent, rgba(79,163,232,0.35), transparent); }
+
+/* ── PANEL LAYOUT ── */
+.panel {
+  position:absolute; top:0; left:0; bottom:0;
+  width:780px; max-width:96vw;
+  background:#03070f;
+  border-right:1px solid rgba(79,163,232,0.18);
+  display:none; flex-direction:row;
+  animation: fade-in 0.25s ease;
+  overflow:hidden;
+  z-index:5;
+}
+.panel.open { display:flex; }
+
+/* Panel content (left side) */
+.panel-content {
+  width:400px; min-width:260px; flex-shrink:0;
+  overflow-y:auto; padding:28px 24px 28px;
+}
+.panel-content::-webkit-scrollbar { width:4px; }
+.panel-content::-webkit-scrollbar-thumb { background:rgba(79,163,232,0.3); border-radius:2px; }
+
+/* Panel 3D area (right side) */
+.panel-3d {
+  flex:1; position:relative; display:flex; flex-direction:column;
+  border-left:1px solid rgba(79,163,232,0.12);
+  background:#020510;
+  min-width:220px;
+}
+
+/* 3D viewer header */
+.viewer-header {
+  padding:10px 14px 8px;
+  border-bottom:1px solid rgba(79,163,232,0.12);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.viewer-title {
+  font-family:'Courier New',monospace; font-size:9px;
+  letter-spacing:2.5px; color:rgba(79,163,232,0.6); text-transform:uppercase;
+}
+.viewer-badge {
+  font-family:'Courier New',monospace; font-size:8px; letter-spacing:1px;
+  color:rgba(79,163,232,0.4); background:rgba(79,163,232,0.06);
+  border:1px solid rgba(79,163,232,0.15); border-radius:4px; padding:2px 7px;
+}
+
+/* 3D canvas */
+.panel-3d-canvas {
+  flex:1; display:block; width:100%;
+  cursor:grab;
+}
+.panel-3d-canvas:active { cursor:grabbing; }
+
+/* Placeholder 3D decorativo mientras carga el modelo */
+.placeholder-3d {
+  position:absolute; top:40px; left:0; right:0; bottom:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.ph3-ring {
+  width:90px; height:90px; border-radius:50%;
+  border:1.5px solid rgba(79,163,232,0.25);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; margin-bottom:16px;
+}
+.ph3-ring::before {
+  content:''; position:absolute; inset:-8px; border-radius:50%;
+  border:1px dashed rgba(79,163,232,0.15);
+  animation: spin-slow 8s linear infinite;
+}
+.ph3-ring::after {
+  content:''; position:absolute; inset:-18px; border-radius:50%;
+  border:0.5px dashed rgba(79,163,232,0.08);
+  animation: spin-slow 14s linear infinite reverse;
+}
+.ph3-ring i { font-size:36px; color:rgba(79,163,232,0.35); }
+.ph3-text { font-family:'Courier New',monospace; font-size:9px; letter-spacing:2px; color:rgba(79,163,232,0.3); text-transform:uppercase; text-align:center; }
+.ph3-sub { font-size:10px; color:rgba(255,255,255,0.18); margin-top:5px; font-family:sans-serif; }
+
+/* ── Contenido de paneles ── */
+.ph { display:flex; align-items:center; gap:12px; margin-bottom:18px; border-bottom:1px solid rgba(79,163,232,0.2); padding-bottom:12px; padding-right:50px; }
+.pi { width:42px; height:42px; border-radius:8px; background:rgba(79,163,232,0.1); border:1px solid rgba(79,163,232,0.25); display:flex; align-items:center; justify-content:center; color:#4fa3e8; font-size:21px; flex-shrink:0; }
+.pt { font-size:18px; font-weight:500; color:#fff; font-family:'Georgia',serif; }
+.ps { font-size:10px; color:rgba(79,163,232,0.7); letter-spacing:2px; text-transform:uppercase; margin-top:2px; font-family:'Courier New',monospace; }
+.sl { font-size:10px; letter-spacing:3px; color:#4fa3e8; text-transform:uppercase; margin-bottom:8px; margin-top:18px; font-family:'Courier New',monospace; }
+.sl:first-of-type { margin-top:0; }
+.card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:9px; padding:13px 15px; margin-bottom:9px; }
+.card:hover { border-color:rgba(79,163,232,0.28); }
+.card h3 { font-size:13px; font-weight:600; color:#4fa3e8; margin-bottom:5px; }
+.card p { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.65; font-family:sans-serif; }
+.tl { position:relative; padding-left:20px; }
+.tl::before { content:''; position:absolute; left:5px; top:6px; bottom:6px; width:1px; background:rgba(79,163,232,0.25); }
+.ti { position:relative; margin-bottom:16px; }
+.ti::before { content:''; position:absolute; left:-18px; top:5px; width:8px; height:8px; border-radius:50%; background:#4fa3e8; box-shadow:0 0 8px rgba(79,163,232,0.6); }
+.ti .yr { font-size:10px; letter-spacing:2px; color:#4fa3e8; margin-bottom:4px; font-family:'Courier New',monospace; }
+.ti p { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.65; font-family:sans-serif; }
+.sg { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.si { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:11px; display:flex; align-items:flex-start; gap:9px; }
+.si:hover { border-color:rgba(79,163,232,0.3); background:rgba(79,163,232,0.04); }
+.si i { font-size:19px; color:#4fa3e8; flex-shrink:0; margin-top:1px; }
+.si .st { font-size:12px; font-weight:600; color:rgba(255,255,255,0.85); font-family:sans-serif; }
+.si .sd { font-size:11px; color:rgba(255,255,255,0.42); margin-top:2px; line-height:1.4; font-family:sans-serif; }
+.stg { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:12px; }
+.sc { background:rgba(79,163,232,0.06); border:1px solid rgba(79,163,232,0.18); border-radius:8px; padding:11px; text-align:center; }
+.sc .n { font-size:22px; font-weight:600; color:#4fa3e8; }
+.sc .l { font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px; letter-spacing:1px; text-transform:uppercase; font-family:'Courier New',monospace; }
+.hb { background:linear-gradient(90deg,rgba(79,163,232,0.12) 0%,transparent 100%); border-left:3px solid #4fa3e8; padding:10px 13px; border-radius:0 8px 8px 0; margin-bottom:9px; }
+.hb p { font-size:13px; color:rgba(255,255,255,0.68); line-height:1.65; font-family:sans-serif; }
+.hb strong { color:#4fa3e8; }
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; letter-spacing:1px; text-transform:uppercase; background:rgba(79,163,232,0.1); color:#4fa3e8; border:1px solid rgba(79,163,232,0.25); margin-right:4px; margin-bottom:5px; font-family:'Courier New',monospace; }
+
+.cbtn {
+  position:absolute; top:16px; right:16px;
+  background:rgba(79,163,232,0.1); border:1.5px solid rgba(79,163,232,0.45);
+  border-radius:8px; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:#4fa3e8; font-size:18px;
+  transition:all 0.2s; pointer-events:all; z-index:10;
+}
+.cbtn:hover { background:rgba(79,163,232,0.22); border-color:#4fa3e8; color:#fff; box-shadow:0 0 12px rgba(79,163,232,0.4); }
+
+/* Responsive: en pantallas pequeñas, apila vertical */
+@media (max-width: 640px) {
+  .panel { flex-direction:column; width:100vw; max-width:100vw; }
+  .panel-content { width:100%; min-width:0; max-height:55vh; }
+  .panel-3d { min-height:200px; }
+}
+</style>
+</head>
+<body>
+<div id="cc">
+  <canvas id="tc"></canvas>
+
+  <div class="ui-overlay">
+    <div class="header-block">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+  </div>
+
+  <!-- BOTONES IZQUIERDA -->
+  <div class="side-deco left" id="deco-left">
+    <button class="ficon-btn" onclick="openPanel('historia')" id="fbtn-historia">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="gH" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#88ccff"/><stop offset="100%" stop-color="#1a6ab5"/></linearGradient></defs>
+        <rect x="28" y="18" width="5" height="32" rx="2.5" transform="rotate(-35 32 32)" fill="url(#gH)" opacity="0.7"/>
+        <path d="M10 14 C14 8 22 10 26 16 L36 26 C30 28 22 26 18 22 Z" fill="url(#gH)"/>
+        <path d="M36 26 L50 40 C52 44 50 50 46 50 L42 48 Z" fill="#4fa3e8" opacity="0.6"/>
+        <circle cx="36" cy="26" r="3" fill="#88ccff"/>
+      </svg>
+      <span class="flabel">Historia</span>
+    </button>
+    <div class="fdivider"></div>
+    <button class="ficon-btn" onclick="openPanel('valores')" id="fbtn-valores">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="gV" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#88ccff"/><stop offset="100%" stop-color="#1a4a8a"/></radialGradient></defs>
+        <circle cx="32" cy="32" r="28" fill="none" stroke="#4fa3e8" stroke-width="0.8" opacity="0.3" stroke-dasharray="4 3"/>
+        <polygon points="32,6 37,21 52,21 40,30 45,45 32,36 19,45 24,30 12,21 27,21" fill="url(#gV)" opacity="0.9"/>
+        <circle cx="32" cy="29" r="7" fill="#0a1a3a" stroke="#4fa3e8" stroke-width="1.2"/>
+        <text x="32" y="33" text-anchor="middle" font-size="8" fill="#88ccff" font-family="Courier New">S·XX</text>
+      </svg>
+      <span class="flabel">Valores</span>
+    </button>
+  </div>
+
+  <!-- BOTÓN DERECHA -->
+  <div class="side-deco right" id="deco-right">
+    <button class="ficon-btn" onclick="openPanel('servicios')" id="fbtn-servicios">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#88ccff"/><stop offset="100%" stop-color="#1a5a9a"/></linearGradient></defs>
+        <path d="M12 36 C12 20 20 10 32 10 C44 10 52 20 52 36 Z" fill="url(#gS)" opacity="0.9"/>
+        <rect x="8" y="35" width="48" height="7" rx="3.5" fill="#4fa3e8" opacity="0.7"/>
+        <path d="M20 18 C24 13 30 12 36 14" stroke="#c8e8ff" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+        <circle cx="32" cy="29" r="5" fill="#1a2a4a" stroke="#4fa3e8" stroke-width="1.5"/>
+        <circle cx="32" cy="29" r="3" fill="#88ccff" opacity="0.8"/>
+        <line x1="32" y1="20" x2="32" y2="16" stroke="#88ccff" stroke-width="1.5" opacity="0.6"/>
+        <line x1="38" y1="23" x2="41" y2="20" stroke="#88ccff" stroke-width="1.5" opacity="0.4"/>
+        <line x1="26" y1="23" x2="23" y2="20" stroke="#88ccff" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+      <span class="flabel">Servicios</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PANEL HISTORIA                                  -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="panel" id="panel-historia">
+    <button class="cbtn" onclick="closePanel()" title="Cerrar"><i class="ti ti-x"></i></button>
+
+    <!-- Contenido izquierdo -->
+    <div class="panel-content">
+      <div class="ph">
+        <div class="pi"><i class="ti ti-book"></i></div>
+        <div><div class="pt">Historia</div><div class="ps">Raíces del pueblo minero</div></div>
+      </div>
+      <div class="hb">
+        <p>La <strong>Cooperativa Multiactiva Siglo XX Catavi</strong> nace en el corazón de Llallagua, Potosí — uno de los centros mineros más emblemáticos de América Latina.</p>
+      </div>
+      <div class="sl">Línea del tiempo</div>
+      <div class="tl">
+        <div class="ti"><div class="yr">Principios del Siglo XX</div><p>Las minas de estaño de Siglo XX y Catavi se convierten en las más productivas de Bolivia, impulsadas por el auge mundial del estaño.</p></div>
+        <div class="ti"><div class="yr">1952 · Revolución Nacional</div><p>La Revolución del MNR nacionaliza las grandes empresas mineras. Los mineros de Catavi y Siglo XX son fuerza central del cambio histórico boliviano.</p></div>
+        <div class="ti"><div class="yr">1985 · Crisis del Estaño</div><p>El derrumbe del precio internacional fuerza el cierre de COMIBOL. Miles de mineros son relocalizados. Nace la organización cooperativa como alternativa de vida.</p></div>
+        <div class="ti"><div class="yr">Década de 1990</div><p>Trabajadores organizados crean la Cooperativa Multiactiva Siglo XX Catavi para preservar el trabajo, la identidad y el patrimonio minero regional.</p></div>
+        <div class="ti"><div class="yr">Siglo XXI</div><p>La cooperativa diversifica hacia lo multiactivo — comercio, servicios y apoyo comunitario — consolidándose como pilar económico de Llallagua.</p></div>
+      </div>
+      <div class="sl">Contexto Regional</div>
+      <div class="card"><h3>Llallagua: Capital Minera</h3><p>El cerro Siglo XX y el complejo Catavi son símbolos de resistencia y dignidad obrera boliviana. Llallagua guarda en cada calle la memoria del trabajo minero.</p></div>
+      <div style="margin-top:10px;">
+        <span class="badge">Potosí</span><span class="badge">Llallagua</span><span class="badge">Estaño</span><span class="badge">Patrimonio Obrero</span>
+      </div>
+    </div>
+
+    <!-- Visor 3D derecho: modelo cargado automáticamente desde código -->
+    <div class="panel-3d" id="viewer-historia">
+      <div class="viewer-header">
+        <span class="viewer-title"> Historia</span>
+        <span class="viewer-badge" id="badge-historia">Cargando…</span>
+      </div>
+      <canvas class="panel-3d-canvas" id="canvas-historia"></canvas>
+      <div class="placeholder-3d" id="ph-historia">
+        <div class="ph3-ring"><i class="ti ti-pick"></i></div>
+        <div class="ph3-text">Cargando modelo</div>
+        <div class="ph3-sub">Por favor espera…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PANEL SERVICIOS                                 -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="panel" id="panel-servicios">
+    <button class="cbtn" onclick="closePanel()" title="Cerrar"><i class="ti ti-x"></i></button>
+
+    <div class="panel-content">
+      <div class="ph">
+        <div class="pi"><i class="ti ti-building-community"></i></div>
+        <div><div class="pt">Servicios</div><div class="ps">Lo que ofrecemos a nuestra comunidad</div></div>
+      </div>
+      <div class="stg">
+        <div class="sc"><div class="n">+30</div><div class="l">Años de servicio</div></div>
+        <div class="sc"><div class="n">Multi</div><div class="l">Activa y diversa</div></div>
+        <div class="sc"><div class="n">100%</div><div class="l">Boliviana</div></div>
+        <div class="sc"><div class="n">Llallagua</div><div class="l">Sede principal</div></div>
+      </div>
+      <div class="sl">Nuestros Servicios</div>
+      <div class="sg">
+        <div class="si"><i class="ti ti-helmet"></i><div><div class="st">Actividad Minera</div><div class="sd">Extracción y procesamiento cooperativo de minerales</div></div></div>
+        <div class="si"><i class="ti ti-shopping-cart"></i><div><div class="st">Comercio</div><div class="sd">Tiendas cooperativas y distribución de productos</div></div></div>
+        <div class="si"><i class="ti ti-heart-handshake"></i><div><div class="st">Bienestar Social</div><div class="sd">Apoyo a socios, familias y comunidad</div></div></div>
+        <div class="si"><i class="ti ti-school"></i><div><div class="st">Educación</div><div class="sd">Becas y formación para hijos de socios</div></div></div>
+        <div class="si"><i class="ti ti-building-bank"></i><div><div class="st">Ahorro y Crédito</div><div class="sd">Servicios financieros solidarios</div></div></div>
+        <div class="si"><i class="ti ti-first-aid-kit"></i><div><div class="st">Salud</div><div class="sd">Atención médica para la familia cooperativista</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel-3d" id="viewer-servicios">
+      <div class="viewer-header">
+        <span class="viewer-title"> Servicios</span>
+        <span class="viewer-badge" id="badge-servicios">Cargando…</span>
+      </div>
+      <canvas class="panel-3d-canvas" id="canvas-servicios"></canvas>
+      <div class="placeholder-3d" id="ph-servicios">
+        <div class="ph3-ring"><i class="ti ti-helmet"></i></div>
+        <div class="ph3-text">Cargando modelo</div>
+        <div class="ph3-sub">Por favor espera…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PANEL VALORES                                   -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="panel" id="panel-valores">
+    <button class="cbtn" onclick="closePanel()" title="Cerrar"><i class="ti ti-x"></i></button>
+
+    <div class="panel-content">
+      <div class="ph">
+        <div class="pi"><i class="ti ti-star"></i></div>
+        <div><div class="pt">Valores &amp; Misión</div><div class="ps">La esencia de nuestra cooperativa</div></div>
+      </div>
+      <div class="hb"><p><strong>Misión:</strong> Promover el desarrollo integral de socios y la comunidad de Llallagua mediante gestión cooperativa, solidaria y democrática.</p></div>
+      <div class="hb"><p><strong>Visión:</strong> Ser la cooperativa multiactiva referente de Potosí, reconocida por su impacto social y la preservación del legado minero boliviano.</p></div>
+      <div class="sl">Nuestros Pilares</div>
+      <div class="card"><h3>Democracia Interna</h3><p>Cada socio participa en asambleas, vota decisiones y puede postularse a cargos. El poder nace de la base.</p></div>
+      <div class="card"><h3>Solidaridad</h3><p>El éxito colectivo por encima del beneficio individual. Compartimos riesgos y ganancias.</p></div>
+      <div class="card"><h3>Desarrollo Comunitario</h3><p>Reinvertimos en Llallagua: infraestructura, educación, salud y cultura minera.</p></div>
+      <div class="card"><h3>Identidad Minera</h3><p>Honramos el legado de los mineros que construyeron Bolivia.</p></div>
+      <div class="sl">Principios Cooperativos</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;">
+        <span class="badge">Membresía abierta</span><span class="badge">Control democrático</span><span class="badge">Participación económica</span><span class="badge">Autonomía</span><span class="badge">Educación continua</span><span class="badge">Cooperación</span><span class="badge">Compromiso comunitario</span>
+      </div>
+    </div>
+
+    <div class="panel-3d" id="viewer-valores">
+      <div class="viewer-header">
+        <span class="viewer-title"> Valores</span>
+        <span class="viewer-badge" id="badge-valores">Cargando…</span>
+      </div>
+      <canvas class="panel-3d-canvas" id="canvas-valores"></canvas>
+      <div class="placeholder-3d" id="ph-valores">
+        <div class="ph3-ring"><i class="ti ti-star"></i></div>
+        <div class="ph3-text">Cargando modelo</div>
+        <div class="ph3-sub">Por favor espera…</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #cc -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+(function(){
+
+  /* ══════════════════════════════════════════
+     CONFIGURA AQUÍ LAS RUTAS DE TUS MODELOS .GLB
+     Cambia estos paths por los nombres/rutas reales
+     de tus archivos. Deben estar en el mismo servidor
+     que este HTML (o una URL accesible).
+  ══════════════════════════════════════════ */
+  const PANEL_MODELS = {
+    historia:  './casco.glb',
+    servicios: './almacenamiento.glb',
+    valores:   './MNERO.glb'
+  };
+
+  /* ══════════════════════════════════════════
+     ESCENA PRINCIPAL (fondo con escudo.glb)
+  ══════════════════════════════════════════ */
+  const container = document.getElementById('cc');
+  const canvas    = document.getElementById('tc');
+  const W = () => container.clientWidth;
+  const H = () => container.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W(), H());
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding    = THREE.sRGBEncoding;
+  renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, W()/H(), 0.1, 100);
+  camera.position.set(0, 0.5, 5.5);
+  camera.lookAt(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0x0a1a2e, 1.2));
+  const dirLight = new THREE.DirectionalLight(0xadd8ff, 2.8);
+  dirLight.position.set(4, 7, 5); dirLight.castShadow = true; scene.add(dirLight);
+  const fillDir = new THREE.DirectionalLight(0x1a4a8a, 1.0);
+  fillDir.position.set(-5, 2, -4); scene.add(fillDir);
+  const rimLight = new THREE.DirectionalLight(0x4fa3e8, 0.6);
+  rimLight.position.set(0, -2, -5); scene.add(rimLight);
+  const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  topLight.position.set(0, 10, 0); scene.add(topLight);
+
+  function makeParticles(count, spread, color, size, opacity) {
+    const pos=new Float32Array(count*3), base=new Float32Array(count*3), off=new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      const x=(Math.random()-.5)*spread[0], y=(Math.random()-.5)*spread[1], z=(Math.random()-.5)*spread[2];
+      pos[i*3]=x; pos[i*3+1]=y; pos[i*3+2]=z;
+      base[i*3]=x; base[i*3+1]=y; base[i*3+2]=z;
+      off[i*3]=Math.random()*Math.PI*2; off[i*3+1]=Math.random()*Math.PI*2; off[i*3+2]=Math.random()*Math.PI*2;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const pts=new THREE.Points(geo,new THREE.PointsMaterial({color,size,transparent:true,opacity}));
+    scene.add(pts);
+    return {pts,geo,pos,base,off,count};
+  }
+
+  const p1=makeParticles(350,[22,16,12],0x4fa3e8,0.04,0.5);
+  const p2=makeParticles(80,[18,12,10],0x88ccff,0.07,0.35);
+  const p3=makeParticles(30,[14,10,8],0xffffff,0.1,0.18);
+
+  const r1=new THREE.Mesh(new THREE.TorusGeometry(3.2,0.02,8,80),new THREE.MeshBasicMaterial({color:0x4fa3e8,transparent:true,opacity:0.18}));
+  r1.rotation.x=Math.PI*.5; r1.position.y=-1.8; scene.add(r1);
+  const r2=new THREE.Mesh(new THREE.TorusGeometry(2.3,0.014,8,80),new THREE.MeshBasicMaterial({color:0x1a6ab5,transparent:true,opacity:0.12}));
+  r2.rotation.x=Math.PI*.5; r2.position.y=-1.8; scene.add(r2);
+  const r3=new THREE.Mesh(new THREE.TorusGeometry(1.5,0.01,8,80),new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:0.09}));
+  r3.rotation.x=Math.PI*.5; r3.position.y=-1.8; scene.add(r3);
+
+  /* ── PISO ROCOSO: piedras de distintos tamaños sobre el área de los anillos ── */
+  const floorGroup = new THREE.Group();
+  floorGroup.position.y = -1.8;
+  scene.add(floorGroup);
+
+  const rockColors = [0x5a5450, 0x4a463f, 0x6b6259, 0x3c3936, 0x756a5c, 0x474138];
+
+  function makeRock(size, color) {
+    // Más subdivisiones = silueta redondeada, no un puñado de triángulos grandes
+    const geo = new THREE.IcosahedronGeometry(size, 2);
+    const pos = geo.attributes.position;
+    // Variación aleatoria por roca, pero el "ruido" en sí es una función continua
+    // de la dirección del vértice (no un valor random independiente por vértice),
+    // así las superficies vecinas se deforman juntas en vez de crear picos sueltos.
+    const a1 = Math.random() * 10, a2 = Math.random() * 10, a3 = Math.random() * 10;
+    const f1 = 1.6 + Math.random() * 1.2, f2 = 1.6 + Math.random() * 1.2;
+    for (let i = 0; i < pos.count; i++) {
+      const nx = pos.getX(i), ny = pos.getY(i), nz = pos.getZ(i);
+      const len = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+      const dx = nx/len, dy = ny/len, dz = nz/len;
+      const wobble = 1
+        + 0.11 * Math.sin(dx*f1 + dy*f2 + a1)
+        + 0.08 * Math.cos(dz*f2 - dx*f1 + a2)
+        + 0.05 * Math.sin(dy*3.2 + dz*2.1 + a3);
+      pos.setXYZ(i, nx*wobble, ny*wobble*0.78, nz*wobble);
+    }
+    geo.computeVertexNormals();
+    const mat = new THREE.MeshStandardMaterial({
+      color, roughness: 0.92, metalness: 0.04, flatShading: false
+    });
+    const rock = new THREE.Mesh(geo, mat);
+    // Pequeña deformación extra de silueta (alargada/achatada) para variar la forma entre rocas
+    rock.scale.set(0.85 + Math.random()*0.4, 0.7 + Math.random()*0.5, 0.85 + Math.random()*0.4);
+    rock.castShadow = true;
+    rock.receiveShadow = true;
+    return rock;
+  }
+
+  // Piedras grandes y medianas dispersas sobre el anillo principal
+  const ROCK_COUNT = 70;
+  for (let i = 0; i < ROCK_COUNT; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 0.9 + Math.random() * 3.0; // entre el centro y más allá del anillo exterior
+    const size = 0.045 + Math.pow(Math.random(), 2.2) * 0.32; // más piedras chicas que grandes
+    const color = rockColors[Math.floor(Math.random() * rockColors.length)];
+    const rock = makeRock(size, color);
+    rock.position.set(
+      Math.cos(angle) * radius,
+      -size * 0.4 + Math.random() * 0.03,
+      Math.sin(angle) * radius
+    );
+    rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    floorGroup.add(rock);
+  }
+
+  // Grava/piedrecillas pequeñas para dar densidad de terreno
+  const GRAVEL_COUNT = 90;
+  for (let i = 0; i < GRAVEL_COUNT; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 0.6 + Math.random() * 3.3;
+    const size = 0.015 + Math.random() * 0.04;
+    const color = rockColors[Math.floor(Math.random() * rockColors.length)];
+    const rock = makeRock(size, color);
+    rock.position.set(Math.cos(angle) * radius, -size * 0.3, Math.sin(angle) * radius);
+    rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    floorGroup.add(rock);
+  }
+
+  const mainGroup=new THREE.Group(); scene.add(mainGroup);
+  new THREE.GLTFLoader().load('./escudo.glb',gltf=>{
+    const m=gltf.scene;
+    const box=new THREE.Box3().setFromObject(m);
+    const center=box.getCenter(new THREE.Vector3());
+    const sz=box.getSize(new THREE.Vector3());
+    const scale=2.6/Math.max(sz.x,sz.y,sz.z);
+    m.scale.setScalar(scale);
+    m.position.sub(center.multiplyScalar(scale));
+    m.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
+    mainGroup.add(m);
+  },undefined,()=>{});
+
+  let isDrag=false,px=0,py=0,vx=0,vy=0.003,rotY=0.3,rotX=0.1;
+  canvas.addEventListener('mousedown',e=>{isDrag=true;px=e.clientX;py=e.clientY;vx=0;vy=0;});
+  window.addEventListener('mouseup',()=>{isDrag=false;});
+  window.addEventListener('mousemove',e=>{if(!isDrag)return;vy=(e.clientX-px)*.009;vx=(e.clientY-py)*.009;rotY+=vy;rotX=Math.max(-.7,Math.min(.9,rotX+vx));px=e.clientX;py=e.clientY;});
+
+  function animP(p,t,sx,sy,sz){
+    for(let i=0;i<p.count;i++){
+      p.pos[i*3]=p.base[i*3]+Math.sin(t*sx+p.off[i*3])*.18;
+      p.pos[i*3+1]=p.base[i*3+1]+Math.sin(t*sy+p.off[i*3+1])*.22;
+      p.pos[i*3+2]=p.base[i*3+2]+Math.cos(t*sz+p.off[i*3+2])*.15;
+    }
+    p.geo.attributes.position.needsUpdate=true;
+  }
+
+  let t=0;
+  (function animate(){
+    requestAnimationFrame(animate); t+=0.016;
+    if(!isDrag){vy*=.96;if(Math.abs(vy)<.0005)vy=.003;rotY+=vy;}
+    mainGroup.rotation.y=rotY; mainGroup.rotation.x=rotX;
+    mainGroup.position.y=Math.sin(t*.65)*.06;
+    r1.rotation.z+=.003; r2.rotation.z-=.002; r3.rotation.z+=.0015;
+    animP(p1,t,.4,.3,.35); animP(p2,t,.25,.2,.3); animP(p3,t,.18,.15,.22);
+    renderer.render(scene,camera);
+  })();
+
+  window.addEventListener('resize',()=>{
+    camera.aspect=W()/H(); camera.updateProjectionMatrix(); renderer.setSize(W(),H());
+  });
+
+  /* ══════════════════════════════════════════
+     SISTEMA DE VISORES 3D POR PANEL
+     Cada panel carga su modelo automáticamente
+     desde PANEL_MODELS[panelId], igual que el
+     modelo principal (escudo.glb).
+  ══════════════════════════════════════════ */
+
+  // Mapa de viewers: id → { rend, sc, cam, grp, ... }
+  const viewers = {};
+
+  /* Partículas decorativas reutilizables para los visores pequeños de cada panel */
+  function makeParticlesIn(targetScene, count, spread, color, size, opacity) {
+    const pos=new Float32Array(count*3), base=new Float32Array(count*3), off=new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      const x=(Math.random()-.5)*spread[0], y=(Math.random()-.5)*spread[1], z=(Math.random()-.5)*spread[2];
+      pos[i*3]=x; pos[i*3+1]=y; pos[i*3+2]=z;
+      base[i*3]=x; base[i*3+1]=y; base[i*3+2]=z;
+      off[i*3]=Math.random()*Math.PI*2; off[i*3+1]=Math.random()*Math.PI*2; off[i*3+2]=Math.random()*Math.PI*2;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const pts=new THREE.Points(geo,new THREE.PointsMaterial({color,size,transparent:true,opacity,depthWrite:false}));
+    targetScene.add(pts);
+    return {pts,geo,pos,base,off,count};
+  }
+  function animSmallParticles(p,t,sx,sy,sz,amp){
+    for(let i=0;i<p.count;i++){
+      p.pos[i*3]  =p.base[i*3]  +Math.sin(t*sx+p.off[i*3])  *amp;
+      p.pos[i*3+1]=p.base[i*3+1]+Math.sin(t*sy+p.off[i*3+1])*amp*1.2;
+      p.pos[i*3+2]=p.base[i*3+2]+Math.cos(t*sz+p.off[i*3+2])*amp*0.8;
+    }
+    p.geo.attributes.position.needsUpdate=true;
+  }
+
+  function loadPanelModel(panelId) {
+    const v = viewers[panelId];
+    if (!v) return;
+    const path = PANEL_MODELS[panelId];
+    const badge = document.getElementById('badge-' + panelId);
+    const ph = document.getElementById('ph-' + panelId);
+    if (!path) { if(badge) badge.textContent = 'Sin ruta configurada'; return; }
+
+    new THREE.GLTFLoader().load(path, gltf => {
+      const m = gltf.scene;
+      const box = new THREE.Box3().setFromObject(m);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      // Escalamos el modelo a un tamaño de referencia fijo (1.4 unidades)
+      const scale = 1.4 / maxDim;
+      m.scale.setScalar(scale);
+      m.position.sub(center.multiplyScalar(scale));
+      m.traverse(n => { if(n.isMesh){ n.castShadow=true; n.receiveShadow=true; } });
+      v.grp.add(m);
+
+      // Cámara a distancia fija generosa: con fov=45° a z=4.2 el campo de
+      // visión cubre ~3.5 unidades de alto, de sobra para un modelo de 1.4.
+      v.cam.position.set(0, 0, 4.2);
+      v.cam.near = 0.1;
+      v.cam.far  = 50;
+      v.cam.updateProjectionMatrix();
+      v.cam.lookAt(0, 0, 0);
+
+      if(ph) ph.style.display = 'none';
+      if(badge) badge.textContent = 'Modelo cargado';
+    }, undefined, err => {
+      console.error('Error cargando ' + path, err);
+      if(badge) badge.textContent = 'Error al cargar';
+      if(ph){
+        const sub = ph.querySelector('.ph3-sub');
+        if(sub) sub.textContent = 'No se encontró: ' + path;
+      }
+    });
+  }
+
+  function createViewer(panelId) {
+    if (viewers[panelId]) return;
+
+    const cvs = document.getElementById('canvas-' + panelId);
+    const W3 = () => cvs.clientWidth  || cvs.offsetWidth  || 300;
+    const H3 = () => cvs.clientHeight || cvs.offsetHeight || 300;
+
+    const rend = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+    rend.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    rend.outputEncoding    = THREE.sRGBEncoding;
+    rend.toneMapping       = THREE.ACESFilmicToneMapping;
+    rend.toneMappingExposure = 1.3;
+    rend.setClearColor(0x020510, 1);
+
+    const sc = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+    cam.position.set(0, 0, 3);
+
+    // Luces
+    sc.add(new THREE.AmbientLight(0x1a2a4a, 1.5));
+    const dl = new THREE.DirectionalLight(0xadd8ff, 3.0);
+    dl.position.set(3, 5, 4); sc.add(dl);
+    const fl = new THREE.DirectionalLight(0x4fa3e8, 1.2);
+    fl.position.set(-4, 1, -3); sc.add(fl);
+    const rl = new THREE.DirectionalLight(0x88ccff, 0.5);
+    rl.position.set(0, -3, -4); sc.add(rl);
+
+    const grp = new THREE.Group();
+    sc.add(grp);
+
+    // Partículas decorativas de fondo, propias de este visor (no las de la pantalla principal)
+    const vp1 = makeParticlesIn(sc, 70, [3.4, 3.4, 3.4], 0x4fa3e8, 0.022, 0.55);
+    const vp2 = makeParticlesIn(sc, 26, [2.6, 2.6, 2.6], 0x88ccff, 0.034, 0.4);
+    const vp3 = makeParticlesIn(sc, 12, [2.0, 2.0, 2.0], 0xffffff, 0.045, 0.22);
+
+    // Estado drag (rotación con el mouse / touch)
+    let drag=false, mpx=0, mpy=0, mvy=0.005, mvx=0, mrotY=0.3, mrotX=0.1;
+
+    function onMD(e){ drag=true; mpx=e.clientX||e.touches[0].clientX; mpy=e.clientY||e.touches[0].clientY; mvy=0; mvx=0; }
+    function onMU(){ drag=false; }
+    function onMM(e){
+      if(!drag) return;
+      const cx=e.clientX||(e.touches&&e.touches[0].clientX)||mpx;
+      const cy=e.clientY||(e.touches&&e.touches[0].clientY)||mpy;
+      mvy=(cx-mpx)*.009; mvx=(cy-mpy)*.009;
+      mrotY+=mvy; mrotX=Math.max(-.8,Math.min(.8,mrotX+mvx));
+      mpx=cx; mpy=cy;
+    }
+    cvs.addEventListener('mousedown',onMD);
+    cvs.addEventListener('touchstart',e=>{onMD(e);},{passive:true});
+    window.addEventListener('mouseup',onMU);
+    window.addEventListener('touchend',onMU);
+    window.addEventListener('mousemove',onMM);
+    window.addEventListener('touchmove',e=>{onMM(e);},{passive:true});
+
+    let lt = 0;
+    function loop(ts){
+      requestAnimationFrame(loop);
+      lt = ts;
+
+      // Resize dinámico
+      const w = W3(), h = H3();
+      if(rend.domElement.width !== w * rend.getPixelRatio() || rend.domElement.height !== h * rend.getPixelRatio()){
+        rend.setSize(w, h);
+        cam.aspect = w / Math.max(h, 1);
+        cam.updateProjectionMatrix();
+      }
+
+      if(!drag){ mvy*=.96; if(Math.abs(mvy)<.0005)mvy=.005; mrotY+=mvy; }
+      grp.rotation.y = mrotY;
+      grp.rotation.x = mrotX;
+      grp.position.y = Math.sin(ts * .001) * 0.05;
+
+      const vt = ts * 0.001;
+      animSmallParticles(vp1, vt, .5, .4, .45, .32);
+      animSmallParticles(vp2, vt, .35, .3, .4, .26);
+      animSmallParticles(vp3, vt, .25, .22, .3, .2);
+
+      rend.render(sc, cam);
+    }
+    requestAnimationFrame(loop);
+
+    viewers[panelId] = { rend, sc, cam, grp, vp1, vp2, vp3 };
+
+    // Carga automática del modelo asignado a este panel
+    loadPanelModel(panelId);
+  }
+
+  /* ══════════════════════════════════════════
+     LÓGICA DE PANELES
+  ══════════════════════════════════════════ */
+  const decoLeft  = document.getElementById('deco-left');
+  const decoRight = document.getElementById('deco-right');
+  const allFbtns  = document.querySelectorAll('.ficon-btn');
+
+  window.openPanel = id => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+    document.getElementById('panel-' + id).classList.add('open');
+    allFbtns.forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('fbtn-' + id);
+    if(btn) btn.classList.add('active');
+    decoLeft.classList.add('hidden');
+    decoRight.classList.add('hidden');
+
+    // Ocultamos por completo el canvas de fondo (escena principal) para que
+    // nunca se vea detrás de ningún panel, sea cual sea el motivo visual.
+    canvas.style.visibility = 'hidden';
+
+    // Crear el viewer (y cargar su modelo) la primera vez que se abre el panel
+    setTimeout(() => createViewer(id), 50);
+  };
+
+  window.closePanel = () => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+    allFbtns.forEach(b => b.classList.remove('active'));
+    decoLeft.classList.remove('hidden');
+    decoRight.classList.remove('hidden');
+    canvas.style.visibility = 'visible';
+  };
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxia Minera - Cooperativa Catavi Siglo XX</title>
+    <link rel="stylesheet" href="extraccion.css">
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <a href="../CATAVI.html?mundo=1" id="back-button" title="Volver a la página principal">
+        <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#00ffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </a>
+    
+    <div id="help-button">
+        <div class="helmet-icon">🛸</div>
+        <div class="help-text">AYUDA</div>
+    </div>
+    
+    <div class="controls">
+        <div><strong>CONTROLES:</strong></div>
+        <div>W / ↑ - Adelante</div>
+        <div>S / ↓ - Atras</div>
+        <div>A / ← - Izquierda</div>
+        <div>D / → - Derecha</div>
+        <div>Q - Girar izquierda</div>
+        <div>E - Girar derecha</div>
+        <div>CLICK + ARRASTRAR - Rotar camara</div>
+        <div>SCROLL - Acercar/Alejar</div>
+        <div>ESPACIO - Cambiar estacion</div>
+    </div>
+
+    <div class="station-info" id="station-info">
+        <h3 id="station-title">Estacion</h3>
+        <p id="station-description">Descripcion</p>
+    </div>
+
+    <div class="loading" id="loading">Cargando galaxia minera...</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script type="module" src="extraccion.js"></script>
+</body>
+</html>

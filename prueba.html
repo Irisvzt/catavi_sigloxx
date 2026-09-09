@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooperativa Multiactiva Siglo XX Catavi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; background:#04080f; }
+
+#cc { width:100%; height:100vh; position:relative; background:#04080f; overflow:hidden; }
+#tc { width:100%; height:100%; display:block; }
+
+.ui-overlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; display:flex; flex-direction:column; align-items:center;
+}
+.header-block { text-align:center; margin-top:28px; opacity:0; transition:opacity 1.1s ease; }
+.header-block.show { opacity:1; }
+.header-block .sup { font-family:'Courier New',monospace; font-size:11px; letter-spacing:4px; color:#4fa3e8; text-transform:uppercase; margin-bottom:6px; }
+.header-block h1 { font-family:'Georgia',serif; font-size:46px; font-weight:700; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,0.9); line-height:1.25; }
+.header-block h1 span { color:#4fa3e8; }
+.header-block .tag { font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:2px; margin-top:6px; font-family:'Courier New',monospace; }
+
+.site-message {
+  max-width:680px; margin:22px auto 0; padding:0 20px;
+  text-align:left; opacity:0; transition:opacity 1.3s ease 0.3s, transform 1.1s ease 0.3s;
+  transform:translateY(8px);
+}
+.site-message.show { opacity:1; transform:translateY(0); }
+
+.mag-eyebrow {
+  display:flex; align-items:center; gap:10px; margin-bottom:10px;
+}
+.mag-eyebrow .mag-num {
+  font-family:'Courier New',monospace; font-size:10px; letter-spacing:2px;
+  color:#4fa3e8; border:1px solid rgba(79,163,232,0.4); border-radius:20px;
+  padding:3px 10px; white-space:nowrap;
+}
+.mag-eyebrow .mag-line { flex:1; height:1px; background:linear-gradient(to right, rgba(79,163,232,0.5), transparent); }
+
+.mag-row {
+  display:flex; gap:26px; border-top:1px solid rgba(255,255,255,0.14); padding-top:14px;
+}
+.mag-col { flex:1; min-width:0; }
+.mag-col.mag-col-right { text-align:right; }
+.mag-h {
+  font-family:'Georgia',serif; font-weight:700; font-size:15px;
+  letter-spacing:0.3px; color:#fff; margin-bottom:6px;
+  text-transform:uppercase;
+}
+.mag-col p {
+  font-size:12px; line-height:1.7; color:rgba(255,255,255,0.55);
+  font-family:sans-serif;
+}
+.mag-divider { width:1px; background:rgba(255,255,255,0.14); flex-shrink:0; }
+
+.side-message {
+  position:absolute; top:50%; transform:translateY(-50%);
+  max-width:230px;
+  opacity:0; transition:opacity 1.3s ease 0.3s, transform 1.1s ease 0.3s;
+  pointer-events:none;
+}
+.side-message.left  { left:40px; transform:translateY(-50%) translateX(-14px); }
+.side-message.right { right:40px; text-align:right; transform:translateY(-50%) translateX(14px); }
+.side-message.show.left  { transform:translateY(-50%) translateX(0); opacity:1; }
+.side-message.show.right { transform:translateY(-50%) translateX(0); opacity:1; }
+.side-message p {
+  font-size:12px; line-height:1.7; color:rgba(255,255,255,0.55);
+  font-family:sans-serif;
+}
+@media (max-width: 900px) {
+  .side-message { display:none; }
+}
+
+.mag-bigword {
+  display:none;
+}
+
+@media (max-width: 640px) {
+  .site-message { max-width:88vw; }
+  .mag-row { flex-direction:column; gap:14px; }
+  .mag-divider { display:none; }
+}
+
+/* ══════════ INTRO: minero caminando + revelación ══════════ */
+#intro-layer {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  z-index:30; pointer-events:none;
+}
+.intro-reveal {
+  position:absolute; top:0; left:0; width:100%;
+  padding-top:28px;
+  text-align:center; opacity:0;
+  transition: opacity 1s ease, transform 0.9s ease;
+  transform: translateY(-10px);
+}
+.intro-reveal.show { opacity:1; transform:translateY(0); }
+.intro-reveal .sup { font-family:'Courier New',monospace; font-size:11px; letter-spacing:4px; color:#4fa3e8; text-transform:uppercase; margin-bottom:8px; }
+.intro-reveal h1 { font-family:'Georgia',serif; font-size:52px; font-weight:700; color:#fff; text-shadow:0 2px 20px rgba(0,0,0,0.9); line-height:1.3; }
+.intro-reveal h1 span { color:#4fa3e8; }
+.intro-reveal .tag { font-size:11px; color:rgba(255,255,255,0.45); letter-spacing:2px; margin-top:8px; font-family:'Courier New',monospace; }
+@media (max-width: 640px) {
+  .intro-reveal h1 { font-size:34px; }
+}
+
+/* ── Mensaje que invita a tocar/romper la piedra ── */
+.intro-hint {
+  position:absolute; left:50%; top:24%; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  opacity:0; pointer-events:none;
+  transition: opacity 0.45s ease;
+}
+.intro-hint.show { opacity:1; animation: hint-bounce 1.7s ease-in-out infinite; }
+.intro-hint .hint-icon { font-size:28px; filter:drop-shadow(0 0 10px rgba(79,163,232,0.8)); }
+.intro-hint .hint-text {
+  font-family:'Courier New',monospace; font-size:11px; letter-spacing:2.5px;
+  text-transform:uppercase; color:#dff0ff;
+  background:rgba(79,163,232,0.14); border:1px solid rgba(79,163,232,0.45);
+  padding:8px 18px; border-radius:22px; white-space:nowrap;
+  box-shadow:0 0 18px rgba(79,163,232,0.25);
+}
+.intro-hint .hint-count {
+  font-family:'Courier New',monospace; font-size:10px; letter-spacing:3px;
+  color:rgba(136,204,255,0.75);
+}
+.intro-hint .hint-sub {
+  font-family:sans-serif; font-size:11px; letter-spacing:0.3px;
+  color:rgba(223,240,255,0.65); text-align:center; max-width:220px;
+}
+@keyframes hint-bounce {
+  0%,100% { transform:translate(-50%,-50%) scale(1); }
+  50%     { transform:translate(-50%,-50%) scale(1.07); }
+}
+@media (max-width: 640px) {
+  .intro-hint { top:22%; }
+  .intro-hint .hint-text { font-size:10px; padding:7px 14px; }
+  .intro-hint .hint-sub { font-size:10px; max-width:190px; }
+}
+
+@keyframes float-a { 0%,100%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-13px) rotate(5deg);} }
+@keyframes float-b { 0%,100%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-10px) rotate(-4deg);} }
+@keyframes float-c { 0%,100%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-16px) rotate(7deg);} }
+@keyframes glow-pulse { 0%,100%{filter:drop-shadow(0 0 5px rgba(79,163,232,0.4));} 50%{filter:drop-shadow(0 0 16px rgba(79,163,232,0.9));} }
+@keyframes fade-in { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+@keyframes spin-slow { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+@keyframes pulse-ring { 0%,100%{opacity:0.3;transform:scale(1);} 50%{opacity:0.7;transform:scale(1.06);} }
+
+.side-deco {
+  position:absolute; top:50%; transform:translateY(-50%);
+  pointer-events:none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+}
+.side-deco.left  { left:50px; }
+.side-deco.right { right:50px; }
+.side-deco.center {
+  top:auto; bottom:48px; left:50%;
+  transform:translateX(-50%);
+}
+.side-deco.hidden { opacity:0; pointer-events:none; }
+.side-deco.left.hidden  { transform:translateY(-50%) translateX(-20px); }
+.side-deco.right.hidden { transform:translateY(-50%) translateX(20px); }
+.side-deco.center.hidden { transform:translateX(-50%) translateY(20px); }
+@media (max-width: 640px) {
+  .side-deco.center { bottom:28px; }
+}
+
+.ficon-btn {
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  cursor:pointer; pointer-events:all;
+  background:none; border:none; padding:0;
+}
+.ficon-btn:nth-child(1) { animation: float-a 4.2s ease-in-out infinite; }
+.ficon-btn:nth-child(2) { animation: float-b 3.6s ease-in-out infinite 0.9s; }
+.ficon-btn:nth-child(3) { animation: float-c 4.8s ease-in-out infinite 1.8s; }
+.ficon-btn svg { width:64px; height:64px; animation: glow-pulse 3s ease-in-out infinite; transition: transform 0.2s; }
+.ficon-btn:nth-child(1) svg { animation-delay:0s; }
+.ficon-btn:nth-child(2) svg { animation-delay:1s; }
+.ficon-btn:nth-child(3) svg { animation-delay:2s; }
+.ficon-btn:hover svg { transform: scale(1.13); }
+.ficon-btn:active svg { transform: scale(0.96); }
+.ficon-btn .flabel { font-family:'Courier New',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(79,163,232,0.65); transition: color 0.2s; white-space:nowrap; }
+.ficon-btn:hover .flabel { color:#88ccff; }
+.ficon-btn.active .flabel { color:#4fa3e8; font-weight:700; }
+.ficon-btn.active svg { filter: drop-shadow(0 0 18px rgba(79,163,232,1)); }
+.fdivider { width:1px; height:28px; background:linear-gradient(to bottom, transparent, rgba(79,163,232,0.35), transparent); }
+
+/* ── PANEL LAYOUT ── */
+.panel {
+  position:absolute; top:0; left:0; bottom:0;
+  width:780px; max-width:96vw;
+  background:#03070f;
+  border-right:1px solid rgba(79,163,232,0.18);
+  display:none; flex-direction:row;
+  animation: fade-in 0.25s ease;
+  overflow:hidden;
+  z-index:5;
+}
+.panel.open { display:flex; }
+
+/* Panel content (left side) */
+.panel-content {
+  width:400px; min-width:260px; flex-shrink:0;
+  overflow-y:auto; padding:28px 24px 28px;
+}
+.panel-content::-webkit-scrollbar { width:4px; }
+.panel-content::-webkit-scrollbar-thumb { background:rgba(79,163,232,0.3); border-radius:2px; }
+
+/* Panel 3D area (right side) */
+.panel-3d {
+  flex:1; position:relative; display:flex; flex-direction:column;
+  border-left:1px solid rgba(79,163,232,0.12);
+  background:#020510;
+  min-width:220px;
+}
+
+/* 3D viewer header */
+.viewer-header {
+  padding:10px 14px 8px;
+  border-bottom:1px solid rgba(79,163,232,0.12);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.viewer-title {
+  font-family:'Courier New',monospace; font-size:9px;
+  letter-spacing:2.5px; color:rgba(79,163,232,0.6); text-transform:uppercase;
+}
+.viewer-badge {
+  font-family:'Courier New',monospace; font-size:8px; letter-spacing:1px;
+  color:rgba(79,163,232,0.4); background:rgba(79,163,232,0.06);
+  border:1px solid rgba(79,163,232,0.15); border-radius:4px; padding:2px 7px;
+}
+
+/* 3D canvas */
+.panel-3d-canvas {
+  flex:1; display:block; width:100%;
+  cursor:grab;
+}
+.panel-3d-canvas:active { cursor:grabbing; }
+
+/* Placeholder 3D decorativo mientras carga el modelo */
+.placeholder-3d {
+  position:absolute; top:40px; left:0; right:0; bottom:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.ph3-ring {
+  width:90px; height:90px; border-radius:50%;
+  border:1.5px solid rgba(79,163,232,0.25);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; margin-bottom:16px;
+}
+.ph3-ring::before {
+  content:''; position:absolute; inset:-8px; border-radius:50%;
+  border:1px dashed rgba(79,163,232,0.15);
+  animation: spin-slow 8s linear infinite;
+}
+.ph3-ring::after {
+  content:''; position:absolute; inset:-18px; border-radius:50%;
+  border:0.5px dashed rgba(79,163,232,0.08);
+  animation: spin-slow 14s linear infinite reverse;
+}
+.ph3-ring i { font-size:36px; color:rgba(79,163,232,0.35); }
+.ph3-text { font-family:'Courier New',monospace; font-size:9px; letter-spacing:2px; color:rgba(79,163,232,0.3); text-transform:uppercase; text-align:center; }
+.ph3-sub { font-size:10px; color:rgba(255,255,255,0.18); margin-top:5px; font-family:sans-serif; }
+
+/* ── Contenido de paneles ── */
+.ph { display:flex; align-items:center; gap:12px; margin-bottom:18px; border-bottom:1px solid rgba(79,163,232,0.2); padding-bottom:12px; padding-right:50px; }
+.pi { width:42px; height:42px; border-radius:8px; background:rgba(79,163,232,0.1); border:1px solid rgba(79,163,232,0.25); display:flex; align-items:center; justify-content:center; color:#4fa3e8; font-size:21px; flex-shrink:0; }
+.pt { font-size:18px; font-weight:500; color:#fff; font-family:'Georgia',serif; }
+.ps { font-size:10px; color:rgba(79,163,232,0.7); letter-spacing:2px; text-transform:uppercase; margin-top:2px; font-family:'Courier New',monospace; }
+.sl { font-size:10px; letter-spacing:3px; color:#4fa3e8; text-transform:uppercase; margin-bottom:8px; margin-top:18px; font-family:'Courier New',monospace; }
+.sl:first-of-type { margin-top:0; }
+.card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:9px; padding:13px 15px; margin-bottom:9px; }
+.card:hover { border-color:rgba(79,163,232,0.28); }
+.card h3 { font-size:13px; font-weight:600; color:#4fa3e8; margin-bottom:5px; }
+.card p { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.65; font-family:sans-serif; }
+.tl { position:relative; padding-left:20px; }
+.tl::before { content:''; position:absolute; left:5px; top:6px; bottom:6px; width:1px; background:rgba(79,163,232,0.25); }
+.ti { position:relative; margin-bottom:16px; }
+.ti::before { content:''; position:absolute; left:-18px; top:5px; width:8px; height:8px; border-radius:50%; background:#4fa3e8; box-shadow:0 0 8px rgba(79,163,232,0.6); }
+.ti .yr { font-size:10px; letter-spacing:2px; color:#4fa3e8; margin-bottom:4px; font-family:'Courier New',monospace; }
+.ti p { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.65; font-family:sans-serif; }
+.sg { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.si { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:11px; display:flex; align-items:flex-start; gap:9px; }
+.si:hover { border-color:rgba(79,163,232,0.3); background:rgba(79,163,232,0.04); }
+.si i { font-size:19px; color:#4fa3e8; flex-shrink:0; margin-top:1px; }
+.si .st { font-size:12px; font-weight:600; color:rgba(255,255,255,0.85); font-family:sans-serif; }
+.si .sd { font-size:11px; color:rgba(255,255,255,0.42); margin-top:2px; line-height:1.4; font-family:sans-serif; }
+.stg { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:12px; }
+.sc { background:rgba(79,163,232,0.06); border:1px solid rgba(79,163,232,0.18); border-radius:8px; padding:11px; text-align:center; }
+.sc .n { font-size:22px; font-weight:600; color:#4fa3e8; }
+.sc .l { font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px; letter-spacing:1px; text-transform:uppercase; font-family:'Courier New',monospace; }
+.hb { background:linear-gradient(90deg,rgba(79,163,232,0.12) 0%,transparent 100%); border-left:3px solid #4fa3e8; padding:10px 13px; border-radius:0 8px 8px 0; margin-bottom:9px; }
+.hb p { font-size:13px; color:rgba(255,255,255,0.68); line-height:1.65; font-family:sans-serif; }
+.hb strong { color:#4fa3e8; }
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; letter-spacing:1px; text-transform:uppercase; background:rgba(79,163,232,0.1); color:#4fa3e8; border:1px solid rgba(79,163,232,0.25); margin-right:4px; margin-bottom:5px; font-family:'Courier New',monospace; }
+
+.cbtn {
+  position:absolute; top:16px; right:16px;
+  background:rgba(79,163,232,0.1); border:1.5px solid rgba(79,163,232,0.45);
+  border-radius:8px; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:#4fa3e8; font-size:18px;
+  transition:all 0.2s; pointer-events:all; z-index:10;
+}
+.cbtn:hover { background:rgba(79,163,232,0.22); border-color:#4fa3e8; color:#fff; box-shadow:0 0 12px rgba(79,163,232,0.4); }
+
+/* ── Pantalla completa del Mundo interactivo ── */
+.mundo-screen {
+  position:fixed; inset:0; width:100%; height:100%;
+  background:#04080f; z-index:50; display:none;
+}
+.mundo-screen.open { display:block; }
+.mundo-screen canvas { width:100%; height:100%; display:block; cursor:grab; touch-action:none; }
+.mundo-close { position:absolute; top:18px; right:18px; z-index:10; }
+.mundo-title {
+  position:absolute; top:18px; left:20px; z-index:6;
+  pointer-events:none;
+}
+.mundo-title-sup {
+  font-family:'Courier New',monospace; font-size:9px; letter-spacing:2px;
+  color:rgba(223,240,255,0.7); text-transform:uppercase; margin-bottom:3px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.8);
+}
+.mundo-title-main {
+  font-family:'Georgia',serif; font-size:16px; color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,0.85);
+}
+@media (max-width:640px){
+  .mundo-title-main { font-size:13px; }
+}
+
+/* ── Controles del mundo interactivo (D-pad táctil + instrucciones) ── */
+.world-hint {
+  position:absolute; left:50%; top:70px; transform:translateX(-50%);
+  font-family:'Courier New',monospace; font-size:10px; letter-spacing:1.5px;
+  text-transform:uppercase; color:rgba(223,240,255,0.8);
+  background:rgba(4,8,15,0.55); border:1px solid rgba(79,163,232,0.35);
+  padding:7px 14px; border-radius:16px; white-space:nowrap;
+  pointer-events:none; z-index:6;
+}
+.world-dpad {
+  position:absolute; left:24px; bottom:24px; z-index:8;
+  width:158px; height:158px; display:grid;
+  grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr 1fr;
+  gap:6px;
+}
+.world-dpad button {
+  grid-column:auto; grid-row:auto;
+  background:rgba(79,163,232,0.16); border:1px solid rgba(79,163,232,0.45);
+  border-radius:10px; color:#dff0ff; font-size:20px;
+  display:flex; align-items:center; justify-content:center;
+  touch-action:none; user-select:none; -webkit-user-select:none;
+}
+.world-dpad button:active, .world-dpad button.pressed { background:rgba(79,163,232,0.4); }
+.wd-up    { grid-column:2; grid-row:1; }
+.wd-left  { grid-column:1; grid-row:2; }
+.wd-right { grid-column:3; grid-row:2; }
+.wd-down  { grid-column:2; grid-row:3; }
+@media (min-width: 900px){
+  .world-dpad { display:none; } /* en escritorio se usa el teclado */
+}
+
+/* Responsive: en pantallas pequeñas, apila vertical */
+@media (max-width: 640px) {
+  .panel { flex-direction:column; width:100vw; max-width:100vw; }
+  .panel-content { width:100%; min-width:0; max-height:55vh; }
+  .panel-3d { min-height:200px; }
+}
+</style>
+</head>
+<body>
+<div id="cc">
+  <canvas id="tc"></canvas>
+
+  <!-- ═════════ INTRO: el minero camina, pica la roca y revela el nombre ═════════ -->
+  <div id="intro-layer">
+    <div class="intro-reveal" id="intro-title">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+    <div class="intro-hint" id="intro-hint">
+      <div class="hint-icon">⛏️</div>
+      <div class="hint-text">Toca la piedra para romperla</div>
+      <div class="hint-sub">También puedes arrastrarla y lanzarla ✋</div>
+      <div class="hint-count" id="hint-count"></div>
+    </div>
+  </div>
+
+  <div class="ui-overlay">
+    <div class="header-block" id="site-header">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+    <div class="side-message left" id="msg-left">
+      <div class="mag-h">Quiénes Somos</div>
+      <p>Organización boliviana nacida en Llallagua, Potosí, que reúne el trabajo minero, comercial y social de sus socios bajo un modelo cooperativo, solidario y democrático.</p>
+    </div>
+
+    <div class="side-message right" id="msg-right">
+      <div class="mag-h">Nuestro Compromiso</div>
+      <p>Preservar el legado minero boliviano e impulsar el desarrollo integral de la comunidad a través de la participación activa de cada socio.</p>
+    </div>
+
+    <div class="site-message" id="site-message">
+      <div class="mag-eyebrow">
+        <span class="mag-num">N° 01 · LLALLAGUA</span>
+        <span class="mag-line"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTÓN ÚNICO: MUNDO -->
+  <div class="side-deco center hidden" id="deco-mundo">
+    <button class="ficon-btn" onclick="openPanel('mundo')" id="fbtn-mundo">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#88ccff"/><stop offset="100%" stop-color="#1a5a9a"/></linearGradient></defs>
+        <circle cx="32" cy="32" r="26" fill="url(#gM)" opacity="0.9"/>
+        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55"/>
+        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55" transform="rotate(60 32 32)"/>
+        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55" transform="rotate(120 32 32)"/>
+        <line x1="6" y1="32" x2="58" y2="32" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#dff0ff" stroke-width="1.3"/>
+      </svg>
+      <span class="flabel">Mundo</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PANTALLA COMPLETA: MUNDO INTERACTIVO            -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="mundo-screen" id="mundo-screen">
+    <button class="cbtn mundo-close" id="mundo-close" title="Cerrar"><i class="ti ti-x"></i></button>
+    <div class="mundo-title">
+      <div class="mundo-title-sup">Cooperativa Multiactiva Siglo XX Catavi</div>
+      <div class="mundo-title-main">Mundo · Llallagua, Potosí</div>
+    </div>
+    <canvas id="canvas-mundo"></canvas>
+    <div class="world-hint" id="world-hint">Camina con las flechas / WASD</div>
+    <div class="world-dpad" id="world-dpad">
+      <button class="wd-up"    id="wd-up">▲</button>
+      <button class="wd-left"  id="wd-left">◀</button>
+      <button class="wd-right" id="wd-right">▶</button>
+      <button class="wd-down"  id="wd-down">▼</button>
+    </div>
+  </div>
+
+</div><!-- #cc -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+(function(){
+
+  /* ══════════════════════════════════════════
+     CONFIGURA AQUÍ LAS RUTAS DE TUS MODELOS .GLB
+  ══════════════════════════════════════════ */
+  const SHIELD_MODEL = './escudo.glb';
+  // Personaje caminable del MUNDO: el mismo modelo ("Xbot") que usa el
+  // ejemplo oficial de three.js webgl_animation_skinning_morph, con sus
+  // animaciones incluidas (idle, walk, run, etc.)
+  const WALK_CHARACTER_MODEL = 'https://threejs.org/examples/models/gltf/Xbot.glb';
+
+  /* ══════════════════════════════════════════
+     ESCENA ÚNICA — se usa desde el primer frame
+     (intro: minero + roca) y sigue siendo la
+     misma escena para siempre (el escudo revelado
+     se queda ahí, sin cambiar de escena ni pausar
+     para "entrar" a la página).
+  ══════════════════════════════════════════ */
+  const container = document.getElementById('cc');
+  const canvas    = document.getElementById('tc');
+  const W = () => container.clientWidth;
+  const H = () => container.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W(), H());
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding    = THREE.sRGBEncoding;
+  renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  /* ══════════════════════════════════════════
+     TEXTURA DE LA ROCA PRINCIPAL
+     Pon tu imagen de textura en la misma carpeta
+     que este HTML y ajusta el nombre del archivo
+     abajo si es diferente.
+  ══════════════════════════════════════════ */
+  const textureLoader = new THREE.TextureLoader();
+  const rockTexture = textureLoader.load('./textura de piedra.jpg'); // <-- cambia esta ruta por tu imagen
+  rockTexture.wrapS = THREE.RepeatWrapping;
+  rockTexture.wrapT = THREE.RepeatWrapping;
+  rockTexture.repeat.set(2, 2);   // ajusta si se ve muy estirada (baja) o muy repetida (sube)
+  rockTexture.encoding = THREE.sRGBEncoding;
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, W()/H(), 0.1, 100);
+  camera.position.set(0, 0.5, 5.5);
+  camera.lookAt(0, -0.2, 0);
+
+  scene.add(new THREE.AmbientLight(0x0a1a2e, 1.2));
+  const dirLight = new THREE.DirectionalLight(0xadd8ff, 2.8);
+  dirLight.position.set(4, 7, 5); dirLight.castShadow = true; scene.add(dirLight);
+  const fillDir = new THREE.DirectionalLight(0x1a4a8a, 1.0);
+  fillDir.position.set(-5, 2, -4); scene.add(fillDir);
+  const rimLight = new THREE.DirectionalLight(0x4fa3e8, 0.6);
+  rimLight.position.set(0, -2, -5); scene.add(rimLight);
+  const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  topLight.position.set(0, 10, 0); scene.add(topLight);
+
+  function makeParticles(count, spread, color, size, opacity) {
+    const pos=new Float32Array(count*3), base=new Float32Array(count*3), off=new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      const x=(Math.random()-.5)*spread[0], y=(Math.random()-.5)*spread[1], z=(Math.random()-.5)*spread[2];
+      pos[i*3]=x; pos[i*3+1]=y; pos[i*3+2]=z;
+      base[i*3]=x; base[i*3+1]=y; base[i*3+2]=z;
+      off[i*3]=Math.random()*Math.PI*2; off[i*3+1]=Math.random()*Math.PI*2; off[i*3+2]=Math.random()*Math.PI*2;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const pts=new THREE.Points(geo,new THREE.PointsMaterial({color,size,transparent:true,opacity}));
+    scene.add(pts);
+    return {pts,geo,pos,base,off,count};
+  }
+
+  const p1=makeParticles(350,[22,16,12],0x4fa3e8,0.04,0.5);
+  const p2=makeParticles(80,[18,12,10],0x88ccff,0.07,0.35);
+  const p3=makeParticles(30,[14,10,8],0xffffff,0.1,0.18);
+
+  const r1=new THREE.Mesh(new THREE.TorusGeometry(3.2,0.02,8,80),new THREE.MeshBasicMaterial({color:0x4fa3e8,transparent:true,opacity:0.18}));
+  r1.rotation.x=Math.PI*.5; r1.position.y=-1.8; scene.add(r1);
+  const r2=new THREE.Mesh(new THREE.TorusGeometry(2.3,0.014,8,80),new THREE.MeshBasicMaterial({color:0x1a6ab5,transparent:true,opacity:0.12}));
+  r2.rotation.x=Math.PI*.5; r2.position.y=-1.8; scene.add(r2);
+  const r3=new THREE.Mesh(new THREE.TorusGeometry(1.5,0.01,8,80),new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:0.09}));
+  r3.rotation.x=Math.PI*.5; r3.position.y=-1.8; scene.add(r3);
+
+  /* ── PISO ROCOSO: vacío al inicio (solo existe la piedra que pica el minero).
+     Se llena con piedras — igual que antes — recién cuando el escudo termina
+     de revelarse, para que el arranque muestre "una sola piedra". ── */
+  const floorGroup = new THREE.Group();
+  floorGroup.position.y = -1.8;
+  scene.add(floorGroup);
+
+  const rockColors = [0x5a5450, 0x4a463f, 0x6b6259, 0x3c3936, 0x756a5c, 0x474138];
+
+  /* makeRock ahora acepta un tercer parámetro opcional "texture".
+     Si se pasa una textura, el material la usa como "map" y el color
+     se deja en blanco para no teñir la foto; si no se pasa, funciona
+     exactamente igual que antes (color plano). */
+  function makeRock(size, color, texture) {
+    const geo = new THREE.IcosahedronGeometry(size, 2);
+    const pos = geo.attributes.position;
+    const a1 = Math.random() * 10, a2 = Math.random() * 10, a3 = Math.random() * 10;
+    const f1 = 1.6 + Math.random() * 1.2, f2 = 1.6 + Math.random() * 1.2;
+    for (let i = 0; i < pos.count; i++) {
+      const nx = pos.getX(i), ny = pos.getY(i), nz = pos.getZ(i);
+      const len = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+      const dx = nx/len, dy = ny/len, dz = nz/len;
+      const wobble = 1
+        + 0.11 * Math.sin(dx*f1 + dy*f2 + a1)
+        + 0.08 * Math.cos(dz*f2 - dx*f1 + a2)
+        + 0.05 * Math.sin(dy*3.2 + dz*2.1 + a3);
+      pos.setXYZ(i, nx*wobble, ny*wobble*0.78, nz*wobble);
+    }
+    geo.computeVertexNormals();
+
+    const mat = new THREE.MeshStandardMaterial({
+      map: texture || null,
+      color: texture ? 0xffffff : color,
+      roughness: 0.92,
+      metalness: 0.04,
+      flatShading: false
+    });
+
+    const rock = new THREE.Mesh(geo, mat);
+    rock.scale.set(0.85 + Math.random()*0.4, 0.7 + Math.random()*0.5, 0.85 + Math.random()*0.4);
+    rock.castShadow = true;
+    rock.receiveShadow = true;
+    return rock;
+  }
+
+  const ROCK_COUNT = 70;
+  const GRAVEL_COUNT = 90;
+  let floorPopulated = false;
+  function populateFloor(){
+    if (floorPopulated) return;
+    floorPopulated = true;
+    for (let i = 0; i < ROCK_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.9 + Math.random() * 3.0;
+      const size = 0.045 + Math.pow(Math.random(), 2.2) * 0.32;
+      const color = rockColors[Math.floor(Math.random() * rockColors.length)];
+      const rock = makeRock(size, color);
+      rock.position.set(Math.cos(angle) * radius, -size * 0.4 + Math.random() * 0.03, Math.sin(angle) * radius);
+      rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      floorGroup.add(rock);
+    }
+    for (let i = 0; i < GRAVEL_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.6 + Math.random() * 3.3;
+      const size = 0.015 + Math.random() * 0.04;
+      const color = rockColors[Math.floor(Math.random() * rockColors.length)];
+      const rock = makeRock(size, color);
+      rock.position.set(Math.cos(angle) * radius, -size * 0.3, Math.sin(angle) * radius);
+      rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      floorGroup.add(rock);
+    }
+  }
+
+  /* La única piedra visible al arrancar. El minero la pica y se hace pedazos.
+     Ahora recibe la textura como tercer argumento. */
+  const targetRock = makeRock(0.85, 0x4a463f, rockTexture);
+  targetRock.position.set(0, -1.35, 0);
+  scene.add(targetRock);
+
+  const oreGlow = new THREE.PointLight(0x4fa3e8, 0, 4);
+  oreGlow.position.set(0, -1.15, 0.4);
+  scene.add(oreGlow);
+
+  /* ── Fragmentos: la roca "se deshace" en pedazos que salen disparados ── */
+  const rockFragments = [];
+  function shatterTargetRock(){
+    targetRock.visible = false;
+    const origin = targetRock.position.clone();
+    const fragCount = 18 + Math.floor(Math.random()*8);
+    for (let i=0; i<fragCount; i++){
+      const size = 0.05 + Math.random()*0.16;
+      const frag = makeRock(size, rockColors[Math.floor(Math.random()*rockColors.length)], rockTexture);
+      frag.position.copy(origin);
+      frag.material = frag.material.clone();
+      frag.material.transparent = true;
+      scene.add(frag);
+      const ang = Math.random()*Math.PI*2;
+      const speed = 1.3 + Math.random()*2.4;
+      frag.userData.vel = new THREE.Vector3(Math.cos(ang)*speed, 1.6 + Math.random()*2.4, Math.sin(ang)*speed);
+      frag.userData.rotVel = new THREE.Vector3((Math.random()-0.5)*7, (Math.random()-0.5)*7, (Math.random()-0.5)*7);
+      frag.userData.life = 0;
+      rockFragments.push(frag);
+    }
+  }
+  function updateFragments(delta){
+    for (let i = rockFragments.length-1; i>=0; i--){
+      const f = rockFragments[i];
+      f.userData.life += delta;
+      f.userData.vel.y -= delta * 4.2;
+      f.position.addScaledVector(f.userData.vel, delta);
+      f.rotation.x += f.userData.rotVel.x * delta;
+      f.rotation.y += f.userData.rotVel.y * delta;
+      f.rotation.z += f.userData.rotVel.z * delta;
+      if (f.userData.life > 1.1){
+        f.material.opacity = Math.max(0, 1 - (f.userData.life-1.1)/0.8);
+      }
+      if (f.userData.life > 1.9 || f.position.y < -3.5){
+        scene.remove(f);
+        f.geometry.dispose(); f.material.dispose();
+        rockFragments.splice(i,1);
+      }
+    }
+  }
+
+  /* El escudo: crece desde el centro de la roca al revelarse y se queda ahí
+     para siempre — es el mismo grupo que el usuario puede rotar arrastrando. */
+  const shieldGroup = new THREE.Group();
+  shieldGroup.position.set(0, -0.4, 0);
+  scene.add(shieldGroup);
+  let shieldModel = null, shieldBaseScale = 1, shieldReady = false;
+  new THREE.GLTFLoader().load(SHIELD_MODEL, gltf => {
+    shieldModel = gltf.scene;
+    const box = new THREE.Box3().setFromObject(shieldModel);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    shieldBaseScale = 2.6/Math.max(size.x, size.y, size.z);
+    shieldModel.scale.setScalar(shieldBaseScale);
+    shieldModel.position.sub(center.multiplyScalar(shieldBaseScale));
+    shieldModel.traverse(n=>{ if(n.isMesh){ n.castShadow=true; n.receiveShadow=true; } });
+    shieldModel.scale.setScalar(0.001); // invisible hasta la revelación
+    shieldGroup.add(shieldModel);
+    shieldReady = true;
+    // si el usuario ya pasó la revelación (p.ej. tras "Omitir"), mostrarlo directo
+    if (introState === 'done') shieldModel.scale.setScalar(shieldBaseScale);
+  }, undefined, () => { shieldReady = true; });
+
+  // (El minero de la introducción fue eliminado: la piedra ya aparece
+  // lista para picarse desde el primer instante, sin personaje que camine.)
+
+  /* ══════════════════════════════════════════
+     SECUENCIA: waiting → walking → picking →
+     revealing → done. Al llegar a "done" el
+     escudo simplemente se queda ahí: no hay
+     pausa, ni cambio de escena, ni fundido para
+     "entrar" a la página — la página YA es esta
+     escena, sólo que ahora con los íconos activos.
+  ══════════════════════════════════════════ */
+  const WALK_END_X = -1.35;
+  const PICK_HITS  = 4;
+  let introState  = 'arrived'; // arrived → revealing → done (ya no hay "waiting"/"walking" del minero)
+  let introT = 0, hitsDone = 0, waitT = 0, lastHitTime = -999;
+
+  const introTitleEl = document.getElementById('intro-title');
+  const siteMessageEl = document.getElementById('site-message');
+  const msgLeftEl = document.getElementById('msg-left');
+  const msgRightEl = document.getElementById('msg-right');
+  const introHintEl  = document.getElementById('intro-hint');
+  const hintCountEl  = document.getElementById('hint-count');
+  const decoMundo = document.getElementById('deco-mundo');
+
+  function updateHintCount(){
+    if (!hintCountEl) return;
+    const remaining = Math.max(PICK_HITS - hitsDone, 0);
+    hintCountEl.textContent = remaining > 0 ? ('Faltan ' + remaining + (remaining===1?' golpe':' golpes')) : '';
+  }
+
+  function hideHint(){
+    if (introHintEl) introHintEl.classList.remove('show');
+  }
+
+  // El mensaje invita a romper la piedra desde el primer instante, antes
+  // incluso de que el minero llegue junto a ella.
+  updateHintCount();
+  if (introHintEl) introHintEl.classList.add('show');
+  canvas.style.cursor = 'pointer';
+
+  /* ── El usuario puede tocar la piedra (para golpearla) o arrastrarla y
+     soltarla para lanzarla — rebota contra los bordes de la pantalla. ── */
+  const raycaster = new THREE.Raycaster();
+  const clickPos  = new THREE.Vector2();
+  const dragPlane = new THREE.Plane();
+  const dragPoint = new THREE.Vector3();
+
+  let rockDragging = false, pdStartScreen = null, pdStartTime = 0, pdPointerId = null;
+  let rockVX = 0, rockVY = 0;
+  const pointerHistory = [];
+
+  function getCameraForward(){
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    return dir;
+  }
+
+  // Ventana visible (en unidades de mundo) a la profundidad de la piedra,
+  // para que "rebote en las paredes de la pantalla" sin importar el tamaño
+  // de la ventana ni el resize.
+  function computeRockBounds(zDepth, margin){
+    const forward = getCameraForward();
+    const t = (zDepth - camera.position.z) / forward.z;
+    const centerY = camera.position.y + forward.y * t;
+    const vFov = camera.fov * Math.PI/180;
+    const visibleHeight = 2 * Math.tan(vFov/2) * t;
+    const visibleWidth = visibleHeight * camera.aspect;
+    return {
+      xMin: -visibleWidth/2 + margin,
+      xMax:  visibleWidth/2 - margin,
+      yMin: centerY - visibleHeight/2 + margin,
+      yMax: centerY + visibleHeight/2 - margin
+    };
+  }
+
+  function screenToWorldOnPlane(e, planeZ){
+    const rect = canvas.getBoundingClientRect();
+    clickPos.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    clickPos.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(clickPos, camera);
+    dragPlane.set(new THREE.Vector3(0,0,1), -planeZ);
+    raycaster.ray.intersectPlane(dragPlane, dragPoint);
+    return dragPoint;
+  }
+
+  function registerHit(){
+    const now = performance.now();
+    if (now - lastHitTime < 220) return; // evita contar un mismo toque dos veces
+    lastHitTime = now;
+    hitsDone++;
+    targetRock.position.x += (Math.random()-0.5)*0.06;
+    targetRock.position.z = (Math.random()-0.5)*0.06;
+    oreGlow.intensity = 1.6;
+    updateHintCount();
+    if (hitsDone >= PICK_HITS){
+      hideHint();
+      shatterTargetRock();
+      oreGlow.intensity = 3;
+      canvas.style.cursor = '';
+      introState = 'revealing';
+      introT = 0;
+    }
+  }
+
+  canvas.style.touchAction = 'none';
+
+  canvas.addEventListener('pointerdown', e => {
+    if (introState === 'revealing' || introState === 'done' || !targetRock.visible) return;
+    const rect = canvas.getBoundingClientRect();
+    clickPos.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    clickPos.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(clickPos, camera);
+    const hits = raycaster.intersectObject(targetRock, true);
+    if (!hits.length) return;
+
+    rockDragging = true;
+    pdPointerId = e.pointerId;
+    pdStartScreen = { x:e.clientX, y:e.clientY };
+    pdStartTime = performance.now();
+    rockVX = 0; rockVY = 0;
+    pointerHistory.length = 0;
+    const wp = screenToWorldOnPlane(e, targetRock.position.z);
+    pointerHistory.push({ x:wp.x, y:wp.y, t:pdStartTime });
+    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!rockDragging) return;
+    const wp = screenToWorldOnPlane(e, targetRock.position.z);
+    targetRock.position.x = wp.x;
+    targetRock.position.y = wp.y;
+    const now = performance.now();
+    pointerHistory.push({ x:wp.x, y:wp.y, t:now });
+    if (pointerHistory.length > 6) pointerHistory.shift();
+  });
+
+  function endRockDrag(e){
+    if (!rockDragging) return;
+    rockDragging = false;
+    const dx = e.clientX - pdStartScreen.x, dy = e.clientY - pdStartScreen.y;
+    const dist = Math.hypot(dx, dy);
+    const elapsed = performance.now() - pdStartTime;
+    if (dist < 8 && elapsed < 350){
+      registerHit(); // fue un toque simple: cuenta como golpe de picota
+    } else if (pointerHistory.length >= 2){
+      const a = pointerHistory[0], b = pointerHistory[pointerHistory.length-1];
+      const dt = Math.max((b.t - a.t)/1000, 0.001);
+      let tvx = (b.x - a.x)/dt, tvy = (b.y - a.y)/dt;
+      const MAXV = 9, speed = Math.hypot(tvx,tvy);
+      if (speed > MAXV){ tvx = tvx/speed*MAXV; tvy = tvy/speed*MAXV; }
+      rockVX = tvx; rockVY = tvy;
+    }
+  }
+  canvas.addEventListener('pointerup', endRockDrag);
+  canvas.addEventListener('pointercancel', endRockDrag);
+
+  function updateRockPhysics(delta){
+    if (!targetRock.visible || rockDragging) return;
+    if (Math.abs(rockVX) < 0.001 && Math.abs(rockVY) < 0.001) return;
+    targetRock.position.x += rockVX * delta;
+    targetRock.position.y += rockVY * delta;
+    targetRock.rotation.z -= rockVX * delta * 0.6;
+    targetRock.rotation.x += rockVY * delta * 0.6;
+    const b = computeRockBounds(targetRock.position.z, 0.55);
+    if (targetRock.position.x < b.xMin){ targetRock.position.x = b.xMin; rockVX =  Math.abs(rockVX)*0.72; }
+    if (targetRock.position.x > b.xMax){ targetRock.position.x = b.xMax; rockVX = -Math.abs(rockVX)*0.72; }
+    if (targetRock.position.y < b.yMin){ targetRock.position.y = b.yMin; rockVY =  Math.abs(rockVY)*0.72; }
+    if (targetRock.position.y > b.yMax){ targetRock.position.y = b.yMax; rockVY = -Math.abs(rockVY)*0.72; }
+    rockVX *= 0.995; rockVY *= 0.995;
+  }
+
+  function finishReveal(){
+    if (introTitleEl) introTitleEl.classList.add('show');
+    if (siteMessageEl) siteMessageEl.classList.add('show');
+    if (msgLeftEl) msgLeftEl.classList.add('show');
+    if (msgRightEl) msgRightEl.classList.add('show');
+    populateFloor();
+    if (decoMundo) decoMundo.classList.remove('hidden');
+    canvas.style.cursor = 'grab';
+  }
+
+  function updateSequence(delta){
+    if (rockFragments.length) updateFragments(delta);
+    updateRockPhysics(delta);
+    oreGlow.intensity *= 0.92; // apaga el brillo poco a poco tras cada golpe
+
+    if (introState === 'arrived'){
+      // Suave giro + respiración de luz para invitar a tocar/lanzar la piedra
+      waitT += delta;
+      if (!rockDragging && Math.abs(rockVX) < 0.02 && Math.abs(rockVY) < 0.02){
+        targetRock.rotation.y += delta * 0.25;
+      }
+      oreGlow.intensity = Math.max(oreGlow.intensity, 0.25 + 0.2*Math.sin(waitT*2.4));
+    } else if (introState === 'revealing'){
+      introT += delta;
+      const p = Math.min(introT/0.9, 1);
+      oreGlow.intensity = Math.max(0, 3*(1-p));
+      if (shieldModel){
+        shieldModel.scale.setScalar(shieldBaseScale * p);
+        shieldModel.rotation.y = p * Math.PI * 0.6;
+      }
+      if (p >= 1){
+        introState = 'done';
+        finishReveal();
+      }
+    }
+    // 'done': el escudo ya se queda quieto ahí — sólo lo mueve la interacción
+    // de arrastre / el suave giro de reposo del bloque de animación principal.
+  }
+
+  /* ── Arrastrar con el mouse para rotar el escudo (activo una vez revelado) ── */
+  let isDrag=false,px=0,py=0,vx=0,vy=0.003,rotY=0.3,rotX=0.1;
+  canvas.addEventListener('mousedown',e=>{isDrag=true;px=e.clientX;py=e.clientY;vx=0;vy=0;});
+  window.addEventListener('mouseup',()=>{isDrag=false;});
+  window.addEventListener('mousemove',e=>{if(!isDrag)return;vy=(e.clientX-px)*.009;vx=(e.clientY-py)*.009;rotY+=vy;rotX=Math.max(-.7,Math.min(.9,rotX+vx));px=e.clientX;py=e.clientY;});
+
+  function animP(p,t,sx,sy,sz){
+    for(let i=0;i<p.count;i++){
+      p.pos[i*3]=p.base[i*3]+Math.sin(t*sx+p.off[i*3])*.18;
+      p.pos[i*3+1]=p.base[i*3+1]+Math.sin(t*sy+p.off[i*3+1])*.22;
+      p.pos[i*3+2]=p.base[i*3+2]+Math.cos(t*sz+p.off[i*3+2])*.15;
+    }
+    p.geo.attributes.position.needsUpdate=true;
+  }
+
+  let t=0;
+  (function animate(){
+    requestAnimationFrame(animate);
+    const delta = 0.016; t += delta;
+
+    updateSequence(delta);
+
+    if (introState === 'done'){
+      if(!isDrag){vy*=.96;if(Math.abs(vy)<.0005)vy=.003;rotY+=vy;}
+      shieldGroup.rotation.y=rotY; shieldGroup.rotation.x=rotX;
+    }
+
+    r1.rotation.z+=.003; r2.rotation.z-=.002; r3.rotation.z+=.0015;
+    animP(p1,t,.4,.3,.35); animP(p2,t,.25,.2,.3); animP(p3,t,.18,.15,.22);
+    renderer.render(scene,camera);
+  })();
+
+  window.addEventListener('resize',()=>{
+    camera.aspect=W()/H(); camera.updateProjectionMatrix(); renderer.setSize(W(),H());
+  });
+
+  /* ══════════════════════════════════════════
+     MUNDO INTERACTIVO — calle de la cooperativa
+     recreada de forma estilizada a partir de las
+     fotos (entrada de tierra, casas con techos de
+     calamina, camiones mineros, cerros al fondo).
+     Se recorre en tercera persona: la cámara sigue
+     a un personaje que el usuario mueve con las
+     flechas/WASD (o el D-pad táctil en celular).
+  ══════════════════════════════════════════ */
+
+  // ── Texturas generadas por canvas (sin archivos externos) ──
+  function makeDustGroundTexture(){
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#cfc4ad';
+    ctx.fillRect(0,0,256,256);
+    for (let i=0;i<2200;i++){
+      const x = Math.random()*256, y = Math.random()*256;
+      const g = 150 + Math.random()*80;
+      ctx.fillStyle = `rgba(${g|0},${(g-14)|0},${(g-30)|0},${0.12+Math.random()*0.18})`;
+      const s = 0.6 + Math.random()*2.2;
+      ctx.fillRect(x, y, s, s);
+    }
+    // rodadas / huellas suaves
+    ctx.strokeStyle = 'rgba(90,80,64,0.12)';
+    ctx.lineWidth = 6;
+    for (let i=0;i<3;i++){
+      ctx.beginPath();
+      const yy = 60 + i*70;
+      ctx.moveTo(0, yy);
+      ctx.bezierCurveTo(80, yy+14, 176, yy-14, 256, yy);
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  function makeCorrugatedTexture(baseHex){
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = baseHex;
+    ctx.fillRect(0,0,64,64);
+    for (let x=0; x<64; x+=6){
+      const shade = (x/6)%2===0 ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.16)';
+      ctx.fillStyle = shade;
+      ctx.fillRect(x,0,3,64);
+    }
+    for (let i=0;i<40;i++){
+      ctx.fillStyle = `rgba(120,70,40,${0.05+Math.random()*0.12})`;
+      ctx.fillRect(Math.random()*64, Math.random()*64, 1+Math.random()*2, 1+Math.random()*2);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(3,2);
+    return tex;
+  }
+
+  function makeAdobeTexture(baseHex){
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = baseHex;
+    ctx.fillRect(0,0,64,64);
+    for (let i=0;i<160;i++){
+      ctx.fillStyle = `rgba(0,0,0,${0.04+Math.random()*0.08})`;
+      ctx.fillRect(Math.random()*64, Math.random()*64, 1+Math.random()*3, 1+Math.random()*3);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  function makeContactShadowTexture(){
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const ctx = c.getContext('2d');
+    const grad = ctx.createRadialGradient(64,64,0,64,64,64);
+    grad.addColorStop(0, 'rgba(0,0,0,0.55)');
+    grad.addColorStop(0.6, 'rgba(0,0,0,0.28)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
+  const contactShadowTex = makeContactShadowTexture();
+
+  const dustGroundTex = makeDustGroundTexture();
+
+  /* ══════════════════════════════════════════
+     COLISIONES DEL MUNDO
+     Cada edificio que se agrega a la escena registra
+     aquí su "huella" en el suelo (un rectángulo AABB
+     en X/Z). Con esto se evita que el personaje camine
+     a través de las paredes, y — más importante — que
+     la cámara en tercera persona termine METIDA DENTRO
+     de un techo o pared (que es lo que se veía en el
+     video: una superficie enorme y rosada tapando toda
+     la pantalla, porque la cámara había atravesado la
+     estructura sin ningún control).
+  ══════════════════════════════════════════ */
+  const collisionBoxes = []; // { minX, maxX, minZ, maxZ, minY, maxY }
+
+  function registerCollisionBox(x, z, halfW, halfD, minY, maxY, margin){
+    margin = margin || 0.12; // pequeño margen extra para no "raspar" la pared
+    collisionBoxes.push({
+      minX: x - halfW - margin, maxX: x + halfW + margin,
+      minZ: z - halfD - margin, maxZ: z + halfD + margin,
+      minY: minY, maxY: maxY
+    });
+  }
+
+  // Empuja (x,z) hacia afuera de cualquier caja de colisión que lo contenga,
+  // moviéndolo por el eje más corto de salida (igual que un "sliding" simple
+  // contra paredes, para poder seguir caminando pegado a una pared sin
+  // trabarse del todo).
+  function resolveCollisions(x, z, y){
+    for (let i = 0; i < collisionBoxes.length; i++){
+      const b = collisionBoxes[i];
+      if (y < b.minY || y > b.maxY) continue;
+      if (x <= b.minX || x >= b.maxX || z <= b.minZ || z >= b.maxZ) continue;
+      // el punto está dentro de la caja: calcular la salida más corta
+      const distToMinX = x - b.minX, distToMaxX = b.maxX - x;
+      const distToMinZ = z - b.minZ, distToMaxZ = b.maxZ - z;
+      const minDist = Math.min(distToMinX, distToMaxX, distToMinZ, distToMaxZ);
+      if (minDist === distToMinX) x = b.minX;
+      else if (minDist === distToMaxX) x = b.maxX;
+      else if (minDist === distToMinZ) z = b.minZ;
+      else z = b.maxZ;
+    }
+    return { x, z };
+  }
+
+  // Revisa si el SEGMENTO entre dos puntos (a la altura de la cámara) cruza
+  // alguna caja de colisión, y si es así devuelve el punto de la caja más
+  // cercano al personaje — así la cámara nunca queda "dentro" de un techo
+  // o pared: se acerca al personaje hasta justo antes de tocar el obstáculo.
+  function clampCameraAgainstWalls(fromX, fromZ, toX, toZ, y){
+    let closestT = 1;
+    for (let i = 0; i < collisionBoxes.length; i++){
+      const b = collisionBoxes[i];
+      if (y < b.minY || y > b.maxY) continue;
+      // intersección segmento-AABB en 2D (X/Z), método "slab"
+      const dx = toX - fromX, dz = toZ - fromZ;
+      let t0 = 0, t1 = 1;
+      const axes = [
+        { d: dx, minB: b.minX - fromX, maxB: b.maxX - fromX },
+        { d: dz, minB: b.minZ - fromZ, maxB: b.maxZ - fromZ }
+      ];
+      let hits = true;
+      for (const ax of axes){
+        if (Math.abs(ax.d) < 1e-6){
+          if (ax.minB > 0 || ax.maxB < 0){ hits = false; break; }
+        } else {
+          let tA = ax.minB / ax.d, tB = ax.maxB / ax.d;
+          if (tA > tB){ const tmp = tA; tA = tB; tB = tmp; }
+          t0 = Math.max(t0, tA);
+          t1 = Math.min(t1, tB);
+          if (t0 > t1){ hits = false; break; }
+        }
+      }
+      if (hits && t0 > 0 && t0 < closestT) closestT = t0;
+    }
+    // un pequeño margen hacia atrás para no quedar pegado justo en la pared
+    closestT = Math.max(0.05, closestT - 0.08);
+    return { x: fromX + (toX-fromX)*closestT, z: fromZ + (toZ-fromZ)*closestT };
+  }
+
+  function buildMundoScene(){
+    const sc = new THREE.Scene();
+    sc.background = new THREE.Color(0x9cc9ec);
+    sc.fog = new THREE.Fog(0xbcdcf2, 30, 150);
+
+    sc.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const sun = new THREE.DirectionalLight(0xfff3d8, 1.15);
+    sun.position.set(18, 28, 12);
+    sun.castShadow = true;
+    sun.shadow.camera.left = -18;
+    sun.shadow.camera.right = 18;
+    sun.shadow.camera.top = 18;
+    sun.shadow.camera.bottom = -18;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 80;
+    sun.shadow.mapSize.set(2048, 2048);
+    sc.add(sun);
+    const fillL = new THREE.DirectionalLight(0xdcefff, 0.5);
+    fillL.position.set(-14, 10, -8);
+    sc.add(fillL);
+
+    // ── Suelo: camino de tierra largo (mundo extendido) ──
+    const groundTex = dustGroundTex.clone();
+    groundTex.needsUpdate = true;
+    groundTex.repeat.set(8, 55);
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(34, 300),
+      new THREE.MeshStandardMaterial({ map: groundTex, roughness: 1 })
+    );
+    ground.rotation.x = -Math.PI/2;
+    ground.position.set(0, 0, -128);
+    ground.receiveShadow = true;
+    sc.add(ground);
+
+    // ── Cerros de fondo (dos capas, como en las fotos) ──
+    // IMPORTANTE: deben quedar bien lejos de zFar (el límite hasta donde
+    // puede caminar el jugador, definido más abajo como -165). Si están
+    // demasiado cerca de ese límite, el jugador termina caminando DENTRO
+    // del cono del cerro y la cámara queda embebida en su geometría — eso
+    // es lo que se veía como manchas gigantes tapando toda la pantalla.
+    // Por eso ahora se ubican mucho más atrás (-210 y -245) y además se
+    // registran como colisión, como resguardo extra.
+    function addMountainRange(zPos, colorHex, heightScale, opacity){
+      const group = new THREE.Group();
+      for (let x=-70; x<=70; x+=7+Math.random()*5){
+        const h = (7+Math.random()*11)*heightScale;
+        const r = 6+Math.random()*4;
+        const geo = new THREE.ConeGeometry(r, h, 5);
+        const mat = new THREE.MeshStandardMaterial({ color: colorHex, flatShading:true, roughness:1, transparent:true, opacity });
+        const m = new THREE.Mesh(geo, mat);
+        const mx = x + (Math.random()-0.5)*4;
+        const mz = zPos + (Math.random()-0.5)*6;
+        m.position.set(mx, h/2 - 1.4, mz);
+        m.rotation.y = Math.random()*Math.PI;
+        group.add(m);
+        // Colisión de resguardo: aunque el jugador no debería llegar tan
+        // lejos, si algún día se agranda el mundo, esto evita por completo
+        // que la cámara pueda quedar dentro del cono.
+        registerCollisionBox(mx, mz, r, r, 0, h);
+      }
+      sc.add(group);
+    }
+    addMountainRange(-245, 0x8f8064, 1, 1);
+    addMountainRange(-210, 0xac9d79, 0.7, 0.9);
+
+    // ── Nubes ──
+    for (let i=0;i<12;i++){
+      const cloud = new THREE.Group();
+      const puffCount = 3+Math.floor(Math.random()*3);
+      for (let j=0;j<puffCount;j++){
+        const geo = new THREE.SphereGeometry(2+Math.random()*1.4, 7, 6);
+        const mat = new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.92 });
+        const puff = new THREE.Mesh(geo, mat);
+        puff.position.set(j*2.3 - puffCount, Math.random()*0.6, Math.random()*1.4);
+        cloud.add(puff);
+      }
+      cloud.position.set((Math.random()-0.5)*90, 20+Math.random()*10, -50-Math.random()*55);
+      cloud.scale.setScalar(1.1+Math.random()*1.2);
+      sc.add(cloud);
+    }
+
+    // ── Edificaciones estilo Llallagua: adobe/ladrillo cerca de la entrada,
+    //    galpones de calamina más adelante — a ambos lados del camino ── */
+    const corruColors = ['#8a8a8a', '#7a5a4a', '#9c9c9c', '#6f4d3c'];
+    const adobeColors  = ['#b98f68', '#a97e57', '#c2a077'];
+
+    function addAdobeHouse(x, z, w, h, d){
+      const grp = new THREE.Group();
+      const tex = makeAdobeTexture(adobeColors[Math.floor(Math.random()*adobeColors.length)]);
+      tex.repeat.set(2,1);
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({ map:tex, roughness:1 }));
+      wall.position.y = h/2;
+      wall.castShadow = true; wall.receiveShadow = true;
+      grp.add(wall);
+      const roofTex = makeCorrugatedTexture('#8f8f95');
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(w*1.12, 0.12, d*1.12), new THREE.MeshStandardMaterial({ map:roofTex, roughness:0.85, metalness:0.1 }));
+      roof.position.y = h + 0.06;
+      grp.add(roof);
+      grp.position.set(x,0,z);
+      grp.rotation.y = (Math.random()-0.5)*0.08;
+      sc.add(grp);
+      // Colisión: solo hasta la altura de la pared (h) — el techo, que
+      // sobresale un poco más ancho, no necesita bloquear el paso.
+      registerCollisionBox(x, z, w/2, d/2, 0, h + 0.3);
+    }
+
+    // Casa de ladrillo/techo de calamina gris, como la de la foto de la entrada
+    function addEntranceHouse(x, z, w, h, d){
+      const grp = new THREE.Group();
+      const brickMat = new THREE.MeshStandardMaterial({ color: 0xa9714a, roughness: 0.95 });
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), brickMat);
+      wall.position.y = h/2;
+      wall.castShadow = true; wall.receiveShadow = true;
+      grp.add(wall);
+
+      // Techo a cuatro aguas, calculado para que quede EXACTAMENTE apoyado
+      // sobre la pared (sin hueco entre ambos, que era lo que se veía "flotando")
+      const roofTex = makeCorrugatedTexture('#8f8a80');
+      const roofHeight = h * 0.5;
+      const roofScaleY = 0.6;
+      const roofRadius = Math.max(w,d) * 0.6;
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(roofRadius, roofHeight, 4),
+        new THREE.MeshStandardMaterial({ map: roofTex, roughness:0.88, metalness:0.1 })
+      );
+      roof.rotation.y = Math.PI/4;
+      const scaleZ = Math.max(d/w, w/d) * 1.05;
+      roof.scale.set(1, roofScaleY, scaleZ);
+      const mediaAlturaTecho = (roofHeight * roofScaleY) / 2;
+      roof.position.y = h + mediaAlturaTecho - 0.015; // -0.015: pequeño solape para que no quede ni una rendija visible
+      roof.castShadow = true;
+      grp.add(roof);
+
+      grp.position.set(x,0,z);
+      sc.add(grp);
+      // Colisión: el techo cónico es más ancho que la pared en la base, así
+      // que la caja de colisión cubre el ancho de la pared Y llega hasta la
+      // punta del techo en altura — esto es justo lo que faltaba antes y
+      // permitía que la cámara terminara "dentro" del cono del techo.
+      const roofTipY = h + roofHeight * roofScaleY;
+      registerCollisionBox(x, z, w/2, d/2, 0, roofTipY);
+    }
+
+    // Poste de madera/metal con antena, como el de la foto
+    function addAntennaPole(x,z,height){
+      const poleMat = new THREE.MeshStandardMaterial({ color:0x4a4a4a });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.06,height,6), poleMat);
+      pole.position.set(x,height/2,z);
+      pole.castShadow = true;
+      sc.add(pole);
+      for (let i=0;i<3;i++){
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(1.1,0.035,0.035), poleMat);
+        arm.position.set(x,height-0.4-i*0.4,z);
+        arm.rotation.y = Math.random()*Math.PI;
+        sc.add(arm);
+      }
+      // El poste es muy angosto: colisión mínima solo para que no se pueda
+      // atravesar el mástil mismo, sin estorbar el paso alrededor.
+      registerCollisionBox(x, z, 0.12, 0.12, 0, height);
+    }
+
+    // Letrero pequeño verde, como el de la entrada
+    function addSign(x,z,colorHex){
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.5,6), new THREE.MeshStandardMaterial({ color:0x333333 }));
+      post.position.set(x,0.75,z);
+      sc.add(post);
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(0.85,0.55,0.04), new THREE.MeshStandardMaterial({ color:colorHex }));
+      sign.position.set(x,1.55,z);
+      sc.add(sign);
+    }
+
+    // Construcción de ladrillo sin terminar (como la de la derecha en la foto)
+    function addUnfinishedBrick(x,z,w,h,d){
+      const brickMat = new THREE.MeshStandardMaterial({ color:0xc98a55, roughness:1 });
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), brickMat);
+      wall.position.set(x,h/2,z);
+      wall.castShadow = true; wall.receiveShadow = true;
+      sc.add(wall);
+      const rebarMat = new THREE.MeshStandardMaterial({ color:0x6b6b6b });
+      for (let i=0;i<4;i++){
+        const rebar = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.55,5), rebarMat);
+        rebar.position.set(x+(Math.random()-0.5)*w*0.7, h+0.28, z+(Math.random()-0.5)*d*0.7);
+        sc.add(rebar);
+      }
+      registerCollisionBox(x, z, w/2, d/2, 0, h + 0.6);
+    }
+
+    function addShed(x, z, w, h, d){
+      const grp = new THREE.Group();
+      const wallTex = makeCorrugatedTexture(corruColors[Math.floor(Math.random()*corruColors.length)]);
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({ map:wallTex, roughness:0.9, metalness:0.15 }));
+      wall.position.y = h/2;
+      wall.castShadow = true; wall.receiveShadow = true;
+      grp.add(wall);
+      // techo a dos aguas simple
+      const roofTex = makeCorrugatedTexture('#7d5a46');
+      const roofMat = new THREE.MeshStandardMaterial({ map:roofTex, roughness:0.8, metalness:0.2 });
+      const roofGeo = new THREE.BoxGeometry(w*1.15, 0.12, d*1.15);
+      const roof = new THREE.Mesh(roofGeo, roofMat);
+      roof.position.y = h + 0.06;
+      grp.add(roof);
+      // postes de soporte (como los galpones abiertos de las fotos)
+      const postMat = new THREE.MeshStandardMaterial({ color:0x5a4a3c });
+      for (const sx of [-1,1]){
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,h,6), postMat);
+        post.position.set(sx*(w/2-0.15), h/2, d/2-0.15);
+        grp.add(post);
+      }
+      grp.position.set(x,0,z);
+      sc.add(grp);
+      registerCollisionBox(x, z, w/2, d/2, 0, h + 0.3);
+    }
+
+    function addConcreteWall(x,z,w,h,d){
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({ color:0xb9b3a4, roughness:1 }));
+      wall.position.set(x,h/2,z);
+      wall.castShadow = true; wall.receiveShadow = true;
+      sc.add(wall);
+      registerCollisionBox(x, z, w/2, d/2, 0, h);
+    }
+
+    // ── Camiones mineros estilizados (como en las fotos) ──
+    function addTruck(x,z,rotY,colorHex){
+      const truck = new THREE.Group();
+      const bodyMat = new THREE.MeshStandardMaterial({ color:colorHex, roughness:0.6, metalness:0.35 });
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.7,1.5,1.9), bodyMat);
+      cab.position.set(0,0.95,1.3);
+      cab.castShadow = true;
+      truck.add(cab);
+      const bed = new THREE.Mesh(new THREE.BoxGeometry(1.9,1.15,3.4), bodyMat);
+      bed.position.set(0,1.0,-1.3);
+      bed.castShadow = true;
+      truck.add(bed);
+      const wheelMat = new THREE.MeshStandardMaterial({ color:0x14120f });
+      const wheelGeo = new THREE.CylinderGeometry(0.42,0.42,0.32,10);
+      [[-0.95,0.42,1.3],[0.95,0.42,1.3],[-0.95,0.42,-1.7],[0.95,0.42,-1.7]].forEach(p=>{
+        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+        wheel.rotation.z = Math.PI/2;
+        wheel.position.set(p[0],p[1],p[2]);
+        truck.add(wheel);
+      });
+      truck.position.set(x,0,z);
+      truck.rotation.y = rotY;
+      sc.add(truck);
+      // Caja de colisión aproximada del camión completo (cabina + platón)
+      registerCollisionBox(x, z, 1.15, 2.9, 0, 2.6);
+    }
+
+    // ── Tramo 1 (LA ENTRADA): reconstrucción fiel de la foto de referencia ──
+    // casa de ladrillo con techo de calamina gris a la izquierda, poste con
+    // antena, letrero verde, y la construcción de ladrillo sin terminar a la
+    // derecha — en el mismo orden en que aparecen en la fotografía.
+    addEntranceHouse(-6.5, -2, 4.4, 2.7, 5.2);
+    addAntennaPole(-8.6, -0.5, 8.5);
+    addSign(-1.4, 1.2, 0x2f6b3c);
+    addUnfinishedBrick(6.8, -1.8, 3.6, 2.1, 3.6);
+    addTruck(3.4, -4, Math.PI*0.08, 0xd8cfa8);
+
+    // casitas de adobe que siguen justo después de la entrada
+    addAdobeHouse(-5.2, -10,  3.4, 2.6, 4.2);
+    addAdobeHouse( 5.4, -14,  3.0, 2.4, 3.6);
+    addAdobeHouse(-5.6, -20, 3.8, 2.8, 4.6);
+    addAdobeHouse( 6.0, -25, 3.2, 2.5, 3.8);
+    addAdobeHouse(-6.2, -31, 3.6, 2.7, 4.4);
+
+    // ── Tramo 2: galpones grandes de calamina con camiones (fotos 2 y 3) ──
+    // mundo más largo: más galpones, repartidos a lo largo de un tramo mayor
+    for (let i=0;i<11;i++){
+      const z = -40 - i*11;
+      const side = i%2===0 ? -1 : 1;
+      addShed(side*6.6, z, 6+Math.random()*2.4, 4+Math.random()*1.6, 8+Math.random()*3.5);
+    }
+
+    // ── Tramo 3 (más adelante): muro de concreto y montículos de mineral, foto 4 ──
+    addConcreteWall(6.8, -158, 0.6, 3.2, 6.5);
+    addConcreteWall(-7.2, -160, 0.6, 3, 5.5);
+    function addTailingsPile(x,z,r){
+      const geo = new THREE.ConeGeometry(r, r*0.55, 10);
+      const mat = new THREE.MeshStandardMaterial({ color:0xe4ded0, roughness:1 });
+      const pile = new THREE.Mesh(geo, mat);
+      pile.position.set(x, r*0.275, z);
+      sc.add(pile);
+      // Los montículos son bajos y redondeados (se pueden "rozar" sin
+      // problema visual), pero igual se registran para que el personaje no
+      // atraviese el centro del cono.
+      registerCollisionBox(x, z, r*0.55, r*0.55, 0, r*0.55);
+    }
+    addTailingsPile(-3.5, -155, 2.8);
+    addTailingsPile(-1, -159, 2.0);
+    addTailingsPile(3, -157, 2.4);
+
+    addTruck(3.2, -44, Math.PI*0.06, 0xb6a06a);
+    addTruck(-3.6, -84, -Math.PI*0.1, 0x8f9296);
+    addTruck(3.6, -120, Math.PI*0.15, 0xc9c2a8);
+    addTruck(-3.2, -150, -Math.PI*0.05, 0xb59a76);
+
+    // ── Postes de luz a lo largo del camino (mundo agrandado) ──
+    const poleMat = new THREE.MeshStandardMaterial({ color:0x4a4038 });
+    for (let i=0;i<21;i++){
+      const px = i%2===0? -3.6 : 3.6, pz = -4 - i*8;
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.09,5.4,6), poleMat);
+      pole.position.set(px, 2.7, pz);
+      sc.add(pole);
+      registerCollisionBox(px, pz, 0.14, 0.14, 0, 5.4);
+    }
+
+    // ── Personaje (visto en tercera persona) ──
+    // Empieza como una figura simple de geometría (placeholder).
+    // Si el modelo Xbot carga correctamente más abajo, esta figura se oculta
+    // y se reemplaza por el modelo real, reutilizando el mismo grupo
+    // "character" (misma posición, misma cámara, mismo control).
+    const character = new THREE.Group();
+    const jacketMat = new THREE.MeshStandardMaterial({ color:0x22262e, roughness:0.75 });
+    const pantsMat  = new THREE.MeshStandardMaterial({ color:0x1a1d22, roughness:0.8 });
+    const skinMat   = new THREE.MeshStandardMaterial({ color:0xcf9d76, roughness:0.9 });
+
+    const placeholderGroup = new THREE.Group();
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.3,0.85,10), jacketMat);
+    torso.position.y = 1.08; torso.castShadow = true;
+    placeholderGroup.add(torso);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.2,12,10), skinMat);
+    head.position.y = 1.65; head.castShadow = true;
+    placeholderGroup.add(head);
+    const legGeo = new THREE.CylinderGeometry(0.1,0.1,0.68,8);
+    const legL = new THREE.Mesh(legGeo, pantsMat); legL.position.set(-0.12,0.34,0); legL.castShadow = true; placeholderGroup.add(legL);
+    const legR = new THREE.Mesh(legGeo, pantsMat); legR.position.set(0.12,0.34,0); legR.castShadow = true; placeholderGroup.add(legR);
+    const armGeo = new THREE.CylinderGeometry(0.075,0.075,0.62,8);
+    const armL = new THREE.Mesh(armGeo, jacketMat); armL.position.set(-0.36,1.08,0); placeholderGroup.add(armL);
+    const armR = new THREE.Mesh(armGeo, jacketMat); armR.position.set(0.36,1.08,0); placeholderGroup.add(armR);
+    character.add(placeholderGroup);
+
+    // Sombra de contacto bajo los pies: sin esto, el personaje se ve
+    // "flotando" aunque técnicamente toque el suelo, porque no hay
+    // ningún elemento visual que lo ancle al piso.
+    const contactShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.9, 0.9),
+      new THREE.MeshBasicMaterial({ map: contactShadowTex, transparent: true, depthWrite: false })
+    );
+    contactShadow.rotation.x = -Math.PI/2;
+    contactShadow.position.y = 0.015;
+    character.add(contactShadow);
+
+    character.position.set(0,0,5.2);
+    sc.add(character);
+
+    /* ── Modelo real del personaje: "Xbot", el mismo modelo que usa el
+       ejemplo oficial de three.js (webgl_animation_skinning_morph). Si
+       carga bien, reemplaza al personaje de geometría simple. ──
+       animState es un objeto mutable: sus campos se completan cuando el
+       modelo termina de cargar (de forma asíncrona), y el resto del
+       código lee siempre animState.mixer / animState.walkAction, así que
+       no importa que la carga tarde unos milisegundos más. */
+    const animState = { mixer: null, walkAction: null, modelLoaded: false };
+    console.log('[Mundo] Intentando cargar el modelo animado (.glb) desde:', WALK_CHARACTER_MODEL);
+    new THREE.GLTFLoader().load(WALK_CHARACTER_MODEL, gltf => {
+      console.log('[Mundo] ¡Modelo Xbot cargado correctamente!', gltf);
+      const object = gltf.scene;
+      const box = new THREE.Box3().setFromObject(object);
+      const size = box.getSize(new THREE.Vector3());
+      console.log('[Mundo] Tamaño detectado del modelo (x,y,z):', size.x, size.y, size.z);
+      const scale = 1.75 / (size.y || 1);
+      object.scale.setScalar(scale);
+      const center = box.getCenter(new THREE.Vector3());
+      object.position.x -= center.x * scale;
+      object.position.z -= center.z * scale;
+      object.position.y -= box.min.y * scale;
+      object.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
+      character.add(object);
+      placeholderGroup.visible = false; // ya no hace falta la figura simple
+      animState.modelLoaded = true;
+
+      // En un .glb las animaciones vienen en "gltf.animations"
+      const clips = gltf.animations;
+      if (clips && clips.length){
+        console.log('[Mundo] Animaciones encontradas en Xbot.glb:', clips.map(a => a.name));
+        animState.mixer = new THREE.AnimationMixer(object);
+        const findClip = (regex, fallbackIndex) => {
+          const found = clips.find(a => regex.test(a.name));
+          return found || clips[fallbackIndex] || clips[0];
+        };
+        // Los clips de Xbot se llaman "walk", "run", "idle", "dance", etc.
+        let walkClip = findClip(/walk|camin|andar|marcha/i, 0);
+
+        /* ── Quitar el "root motion" horizontal del clip (por seguridad) ──
+           Muchas animaciones de caminar traen "horneado" el desplazamiento
+           hacia adelante dentro de la propia animación (mueven el hueso
+           raíz/cadera en X/Z). Como NOSOTROS también movemos el personaje
+           a mano según las teclas, el resultado serían DOS movimientos
+           sumados: el personaje avanzaría de más durante el ciclo y luego,
+           al reiniciarse la animación, la cadera volvería de golpe a su
+           posición original — el efecto de "camina, se para/retrocede, y
+           vuelve a caminar". La solución es dejar que la animación mueva
+           los pies/brazos/torso con normalidad, pero congelar en X y Z la
+           posición del hueso raíz (dejando la Y intacta, para conservar el
+           rebote natural de la caminata). El desplazamiento real por el
+           mundo lo sigue controlando por completo nuestro código
+           (heading/moveSpeed más abajo). */
+        function stripRootMotionXZ(clip){
+          clip.tracks.forEach(track => {
+            const isPositionTrack = track.name.toLowerCase().endsWith('.position');
+            const looksLikeRoot = /hip|root|pelvis|cadera/i.test(track.name);
+            if (isPositionTrack && looksLikeRoot){
+              const values = track.values; // [x0,y0,z0, x1,y1,z1, ...]
+              const baseX = values[0], baseZ = values[2];
+              for (let i = 0; i < values.length; i += 3){
+                values[i]   = baseX; // X fijo: sin desplazamiento propio de la animación
+                values[i+2] = baseZ; // Z fijo: ídem
+                // values[i+1] (Y) se deja tal cual, para conservar el rebote vertical
+              }
+            }
+          });
+          return clip;
+        }
+        walkClip = stripRootMotionXZ(walkClip);
+
+        animState.walkAction = animState.mixer.clipAction(walkClip);
+        animState.walkAction.setLoop(THREE.LoopRepeat);
+      } else {
+        console.log('[Mundo] El modelo Xbot no trae ninguna animación incluida.');
+      }
+    }, undefined, err => {
+      console.error('[Mundo] ERROR: no se pudo cargar "' + WALK_CHARACTER_MODEL + '". Se usa la figura simple. Detalle del error:', err);
+    });
+
+    return { scene: sc, character, legL, legR, armL, armR, animState };
+  }
+
+  let mundoWorld = null;   // { renderer/scene/camera/character/... }
+  let mundoActive = false; // true mientras el panel "Mundo" está abierto
+
+  const worldKeys = {};
+  const worldTouch = { fwd: 0, turn: 0 };
+
+  function isMovementKey(key){
+    return ['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key);
+  }
+  window.addEventListener('keydown', e => {
+    if (!mundoActive) return;
+    const k = e.key.toLowerCase();
+    if (isMovementKey(k)){ worldKeys[k] = true; e.preventDefault(); }
+  });
+  window.addEventListener('keyup', e => {
+    const k = e.key.toLowerCase();
+    if (isMovementKey(k)) worldKeys[k] = false;
+  });
+  // Si la ventana pierde el foco (cambiar de pestaña, abrir devtools, etc.)
+  // el "keyup" de una tecla que quedó apretada puede no llegar nunca, y el
+  // personaje se queda "caminando solo" para siempre. Al recuperar el foco
+  // se limpian todas las teclas de movimiento por seguridad.
+  window.addEventListener('blur', () => { for (const k in worldKeys) worldKeys[k] = false; });
+
+  function setupDpadButton(id, applyFn, clearFn){
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const press = ev => { ev.preventDefault(); btn.classList.add('pressed'); applyFn(); };
+    const release = ev => { if(ev) ev.preventDefault(); btn.classList.remove('pressed'); clearFn(); };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointercancel', release);
+    // OJO: "pointerleave" a propósito NO libera el botón — en celular, el
+    // dedo se desvía un par de píxeles del botón sin querer soltarlo, y
+    // eso disparaba sueltas falsas que se sentían como que el personaje
+    // "se frenaba solo" al caminar. Con pointercapture, el mismo puntero
+    // sigue "perteneciendo" al botón aunque el dedo se salga un poco.
+    btn.addEventListener('pointerdown', ev => { if (btn.setPointerCapture) btn.setPointerCapture(ev.pointerId); });
+  }
+  setupDpadButton('wd-up',    ()=>worldTouch.fwd = 1,  ()=>{ if(worldTouch.fwd>0) worldTouch.fwd = 0; });
+  setupDpadButton('wd-down',  ()=>worldTouch.fwd = -1, ()=>{ if(worldTouch.fwd<0) worldTouch.fwd = 0; });
+  setupDpadButton('wd-left',  ()=>worldTouch.turn = 1, ()=>{ if(worldTouch.turn>0) worldTouch.turn = 0; });
+  setupDpadButton('wd-right', ()=>worldTouch.turn = -1,()=>{ if(worldTouch.turn<0) worldTouch.turn = 0; });
+
+  function createMundoWorld(){
+    console.log('[Mundo] createMundoWorld() ejecutándose — si no ves este mensaje al abrir "Mundo", el archivo que estás probando no tiene este código.');
+    if (mundoWorld) return;
+
+    const cvs = document.getElementById('canvas-mundo');
+    const W3 = () => cvs.clientWidth  || cvs.offsetWidth  || 300;
+    const H3 = () => cvs.clientHeight || cvs.offsetHeight || 300;
+
+    const rend = new THREE.WebGLRenderer({ canvas: cvs, antialias: true });
+    rend.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    rend.outputEncoding = THREE.sRGBEncoding;
+    rend.toneMapping = THREE.ACESFilmicToneMapping;
+    rend.toneMappingExposure = 1.15;
+    rend.shadowMap.enabled = true;
+
+    const built = buildMundoScene();
+    const sc = built.scene, character = built.character;
+    const cam = new THREE.PerspectiveCamera(58, 1, 0.1, 320);
+
+    let heading = Math.PI; // el personaje arranca mirando calle adentro, justo frente a la entrada
+    const moveSpeed = 4.6, turnSpeed = 2.3;
+    const roadHalfWidth = 4.2;
+    // zFar se acorta a -165 (antes -180) para dejar un colchón amplio antes
+    // de los cerros de fondo, que ahora están en -210/-245. Así el jugador
+    // nunca puede llegar a tocarlos, ni por lo tanto la cámara puede
+    // quedar embebida dentro de su geometría.
+    const zNear = 5.5, zFar = -165;
+    let walkPhase = 0;
+    const camDist = 5.6, camHeight = 3.5;
+    const lookAheadDist = 1.5, lookAtHeight = 0.85;
+
+    // La cámara se coloca de una vez en su posición final detrás del
+    // personaje — si no, arranca en (0,0,0) y tarda varios frames en
+    // "deslizarse" hasta ahí, y esos primeros frames son los que se ven
+    // pegados a una pared, como si todo flotara.
+    cam.position.set(
+      character.position.x - Math.sin(heading) * camDist,
+      camHeight,
+      character.position.z - Math.cos(heading) * camDist
+    );
+    cam.lookAt(
+      character.position.x + Math.sin(heading) * lookAheadDist,
+      lookAtHeight,
+      character.position.z + Math.cos(heading) * lookAheadDist
+    );
+
+    const ph = document.getElementById('ph-mundo');
+    const badge = document.getElementById('badge-mundo');
+    if (ph) ph.style.display = 'none';
+    if (badge) badge.textContent = 'Explorable';
+
+    function updateWorld(delta){
+      let turn = 0, fwd = 0;
+      if (worldKeys['arrowleft']  || worldKeys['a']) turn += 1;
+      if (worldKeys['arrowright'] || worldKeys['d']) turn -= 1;
+      if (worldKeys['arrowup']    || worldKeys['w']) fwd += 1;
+      if (worldKeys['arrowdown']  || worldKeys['s']) fwd -= 1;
+      turn += worldTouch.turn;
+      fwd  += worldTouch.fwd;
+      turn = Math.max(-1, Math.min(1, turn));
+      fwd  = Math.max(-1, Math.min(1, fwd));
+
+      heading += turn * turnSpeed * delta;
+
+      const dx = Math.sin(heading) * fwd * moveSpeed * delta;
+      const dz = Math.cos(heading) * fwd * moveSpeed * delta;
+      let nx = character.position.x + dx;
+      let nz = character.position.z + dz;
+      nx = Math.max(-roadHalfWidth, Math.min(roadHalfWidth, nx));
+      nz = Math.max(zFar, Math.min(zNear, nz));
+      // Colisión con edificios: si el nuevo punto cae dentro de alguno,
+      // se empuja hacia afuera por el lado más cercano (esto es lo que
+      // impide que el personaje —y por lo tanto la cámara que lo sigue—
+      // termine caminando A TRAVÉS de una pared o un techo).
+      const resolved = resolveCollisions(nx, nz, 0.9);
+      character.position.x = resolved.x;
+      character.position.z = resolved.z;
+      character.rotation.y = heading;
+
+      // Animación al caminar: si el modelo real (Xbot) ya cargó y trae su
+      // propia animación de caminar, se usa esa; si no, se usa el
+      // balanceo simple de piernas/brazos como respaldo.
+      const enMovimiento = Math.abs(fwd) > 0.05 || Math.abs(turn) > 0.4;
+      if (built.animState.walkAction){
+        if (enMovimiento){
+          if (!built.animState.walkAction.isRunning()) built.animState.walkAction.play();
+        } else if (built.animState.walkAction.isRunning()){
+          built.animState.walkAction.stop();
+        }
+      } else if (!built.animState.modelLoaded){
+        // Balanceo simple de piernas/brazos (solo mientras se usa la figura placeholder)
+        if (enMovimiento){
+          walkPhase += delta * 9;
+          const swing = Math.sin(walkPhase) * 0.5;
+          built.legL.rotation.x = swing;
+          built.legR.rotation.x = -swing;
+          built.armL.rotation.x = -swing;
+          built.armR.rotation.x = swing;
+        } else {
+          built.legL.rotation.x *= 0.8; built.legR.rotation.x *= 0.8;
+          built.armL.rotation.x *= 0.8; built.armR.rotation.x *= 0.8;
+        }
+      }
+
+      // Cámara en tercera persona: detrás y encima del personaje,
+      // inclinada hacia abajo para que se vea suficiente piso.
+      const desiredCamX = character.position.x - Math.sin(heading) * camDist;
+      const desiredCamZ = character.position.z - Math.cos(heading) * camDist;
+      // Antes de mover la cámara hacia esa posición "ideal", se comprueba
+      // si el camino directo desde el personaje hasta ahí cruza alguna
+      // pared/techo — si es así, la cámara se acerca hasta justo antes del
+      // obstáculo en vez de seguir de largo y terminar metida adentro
+      // (que es exactamente el bug del video).
+      const safeCam = clampCameraAgainstWalls(
+        character.position.x, character.position.z,
+        desiredCamX, desiredCamZ,
+        camHeight
+      );
+      cam.position.x += (safeCam.x - cam.position.x) * Math.min(delta*8, 1);
+      cam.position.z += (safeCam.z - cam.position.z) * Math.min(delta*8, 1);
+      cam.position.y += (camHeight - cam.position.y) * Math.min(delta*6, 1);
+      cam.lookAt(
+        character.position.x + Math.sin(heading) * lookAheadDist,
+        lookAtHeight,
+        character.position.z + Math.cos(heading) * lookAheadDist
+      );
+    }
+
+    let lastTs = null;
+    function loop(ts){
+      requestAnimationFrame(loop);
+      if (lastTs === null) lastTs = ts;
+      const delta = Math.min((ts - lastTs) / 1000, 0.05);
+      lastTs = ts;
+
+      const w = W3(), h = H3();
+      const ratio = Math.min(window.devicePixelRatio, 2);
+      if (rend.domElement.width !== Math.floor(w*ratio) || rend.domElement.height !== Math.floor(h*ratio)){
+        rend.setSize(w, h);
+        cam.aspect = w / Math.max(h, 1);
+        cam.updateProjectionMatrix();
+      }
+
+      if (mundoActive) updateWorld(delta);
+      if (built.animState.mixer) built.animState.mixer.update(delta);
+      rend.render(sc, cam);
+    }
+    requestAnimationFrame(loop);
+
+    mundoWorld = { rend, scene: sc, cam, character };
+  }
+
+  /* ══════════════════════════════════════════
+     LÓGICA DE LA PANTALLA MUNDO (pantalla completa)
+  ══════════════════════════════════════════ */
+  const fbtnMundo = document.getElementById('fbtn-mundo');
+  const mundoScreenEl = document.getElementById('mundo-screen');
+  const mundoCloseBtn = document.getElementById('mundo-close');
+
+  window.openPanel = id => {
+    if (id !== 'mundo') return;
+    if (fbtnMundo) fbtnMundo.classList.add('active');
+    decoMundo.classList.add('hidden');
+    canvas.style.visibility = 'hidden';
+
+    mundoScreenEl.classList.add('open');
+    mundoActive = true;
+    setTimeout(createMundoWorld, 50);
+  };
+
+  window.closePanel = () => {
+    mundoScreenEl.classList.remove('open');
+    if (fbtnMundo) fbtnMundo.classList.remove('active');
+    decoMundo.classList.remove('hidden');
+    canvas.style.visibility = 'visible';
+    mundoActive = false;
+    worldTouch.fwd = 0; worldTouch.turn = 0;
+    for (const k in worldKeys) worldKeys[k] = false;
+  };
+
+  if (mundoCloseBtn) mundoCloseBtn.addEventListener('click', closePanel);
+
+})();
+</script>
+</body>
+</html>

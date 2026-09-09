@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooperativa Multiactiva Siglo XX Catavi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="CATAVI.css">
+</head>
+<body>
+<div id="cc">
+  <canvas id="tc"></canvas>
+
+  <!-- ═════════ INTRO: el minero camina, pica la roca y revela el nombre ═════════ -->
+  <div id="intro-layer">
+    <div class="intro-reveal" id="intro-title">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+    <div class="intro-hint" id="intro-hint">
+      <div class="hint-icon">⛏️</div>
+      <div class="hint-text">Toca la piedra para romperla</div>
+      <div class="hint-sub">También puedes arrastrarla y lanzarla ✋</div>
+      <div class="hint-count" id="hint-count"></div>
+    </div>
+  </div>
+
+  <div class="ui-overlay">
+    <div class="header-block" id="site-header">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+    <div class="side-message left" id="msg-left">
+      <div class="mag-h">Quiénes Somos</div>
+      <p>Organización boliviana nacida en Llallagua, Potosí, que reúne el trabajo minero, comercial y social de sus socios bajo un modelo cooperativo, solidario y democrático.</p>
+    </div>
+
+    <div class="side-message right" id="msg-right">
+      <div class="mag-h">Nuestro Compromiso</div>
+      <p>Preservar el legado minero boliviano e impulsar el desarrollo integral de la comunidad a través de la participación activa de cada socio.</p>
+    </div>
+
+    <div class="site-message" id="site-message">
+      <div class="mag-eyebrow">
+        <span class="mag-num">N° 01 · LLALLAGUA</span>
+        <span class="mag-line"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTÓN ÚNICO: MUNDO -->
+  <div class="side-deco center hidden" id="deco-mundo">
+    <button class="ficon-btn" onclick="openPanel('mundo')" id="fbtn-mundo">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#88ccff"/><stop offset="100%" stop-color="#1a5a9a"/></linearGradient></defs>
+        <circle cx="32" cy="32" r="26" fill="url(#gM)" opacity="0.9"/>
+        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55"/>
+        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55" transform="rotate(60 32 32)"/>
+        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55" transform="rotate(120 32 32)"/>
+        <line x1="6" y1="32" x2="58" y2="32" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#dff0ff" stroke-width="1.3"/>
+      </svg>
+      <span class="flabel">Mundo</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PANTALLA COMPLETA: MUNDO INTERACTIVO            -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="mundo-screen" id="mundo-screen">
+    <button class="cbtn mundo-close" id="mundo-close" title="Cerrar"><i class="ti ti-x"></i></button>
+    <div class="mundo-title">
+      <div class="mundo-title-sup">Cooperativa Multiactiva Siglo XX Catavi</div>
+      <div class="mundo-title-main">Mundo · Llallagua, Potosí</div>
+    </div>
+    <canvas id="canvas-mundo"></canvas>
+    <div class="world-hint" id="world-hint">Camina con las flechas / WASD</div>
+    <div class="world-dpad" id="world-dpad">
+      <button class="wd-up"    id="wd-up">▲</button>
+      <button class="wd-left"  id="wd-left">◀</button>
+      <button class="wd-right" id="wd-right">▶</button>
+      <button class="wd-down"  id="wd-down">▼</button>
+    </div>
+  </div>
+ <script type="module" src="CATAVI.js"></script>
+</div><!-- #cc -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.6.9/umd/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+
+</body>
+</html>
