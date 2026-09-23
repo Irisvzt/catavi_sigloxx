@@ -1,0 +1,36 @@
+<!-- ══════ MENÚ FLOTANTE ══════
+     Reemplaza los bloques antiguos #deco-mundo y #ambient-switch por este.
+     IMPORTANTE: el id "deco-mundo" debe quedarse (CATAVI.js lo usa para mostrar/ocultar el menú). -->
+<div class="menu-dock hidden" id="deco-mundo">
+
+  <!-- Opciones que salen del botón 2 -->
+  <div class="pop" id="dock-pop">
+    <button class="nav-items" id="pop-historia" title="Historia">
+      <span class="nav-circle"><i class="ti ti-history"></i></span>
+      <span class="nav-label">Historia</span>
+    </button>
+    <button class="nav-items" id="pop-mundo" title="Mundo">
+      <span class="nav-circle"><i class="ti ti-world"></i></span>
+      <span class="nav-label">Mundo</span>
+    </button>
+  </div>
+
+  <div class="wrapper">
+    <!-- Botón 1: modo claro / oscuro -->
+    <button class="item theme-btn" id="dock-theme" aria-label="Cambiar a modo oscuro">
+      <i class="ti ti-sun ico-sun"></i>
+      <i class="ti ti-moon ico-moon"></i>
+    </button>
+
+    <!-- Botón 2: menú (Historia y Mundo) -->
+    <button class="item gallery" id="dock-menu" aria-label="Menú" aria-expanded="false">
+      <span class="dot dot1"></span><span class="dot dot2"></span><span class="dot dot3"></span>
+      <span class="dot dot4"></span><span class="dot dot5"></span><span class="dot dot6"></span>
+    </button>
+
+    <!-- Botón 3: Mundo -->
+    <button class="item add" id="dock-mundo" aria-label="Entrar al Mundo">
+      <i class="ti ti-world"></i>
+    </button>
+  </div>
+</div>

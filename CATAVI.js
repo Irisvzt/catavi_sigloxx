@@ -5,7 +5,7 @@
   ══════════════════════════════════════════ */
   const MINER_MODEL = './MNERO.glb'; // ya no se usa visualmente en la intro (ver más abajo)
   const SHIELD_MODEL = './escudo.glb';
-  const WALK_MINER_FBX = './caminando.fbx'; // usado en el MUNDO caminable
+  const WALK_MINER_FBX = './Start Walking.fbx'; // usado en el MUNDO caminable
 
   /* ══════════════════════════════════════════
      PORTALES A OTROS MUNDOS
@@ -36,18 +36,14 @@
   renderer.toneMappingExposure = 1.2;
 
   const textureLoader = new THREE.TextureLoader();
-  const rockTexture = textureLoader.load('./textura de piedra.jpg');
-  rockTexture.wrapS = THREE.RepeatWrapping;
-  rockTexture.wrapT = THREE.RepeatWrapping;
-  rockTexture.repeat.set(2, 2);
-  rockTexture.encoding = THREE.sRGBEncoding;
 
   const scene  = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, W()/H(), 0.1, 100);
   camera.position.set(0, 0.5, 5.5);
   camera.lookAt(0, -0.2, 0);
 
-  scene.add(new THREE.AmbientLight(0x0a1a2e, 1.2));
+  const ambientLight = new THREE.AmbientLight(0x0a1a2e, 1.2);
+  scene.add(ambientLight);
   const dirLight = new THREE.DirectionalLight(0xadd8ff, 2.8);
   dirLight.position.set(4, 7, 5); dirLight.castShadow = true; scene.add(dirLight);
   const fillDir = new THREE.DirectionalLight(0x1a4a8a, 1.0);
@@ -56,6 +52,130 @@
   rimLight.position.set(0, -2, -5); scene.add(rimLight);
   const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
   topLight.position.set(0, 10, 0); scene.add(topLight);
+
+  /* ══════════════════════════════════════════════════════════
+     CIELO AMBIENTAL PROCEDURAL — Claro / Oscuro (sin imágenes)
+     Cambia el degradado del cielo, el sol/luna, las estrellas y
+     la iluminación de toda la escena, con transición suave.
+  ══════════════════════════════════════════════════════════ */
+  const AMBIENT_THEMES = {
+    claro: {
+      skyTop: new THREE.Color(0x3a8fd6), skyBottom: new THREE.Color(0xbfe3ff),
+      sunColor: new THREE.Color(0xfff6d0), sunPos: new THREE.Vector3(6, 9, -10),
+      ambient: new THREE.Color(0xaee0ff), ambientI: 1.3,
+      dir: new THREE.Color(0xffffff), dirI: 2.6,
+      fill: new THREE.Color(0x6fa8dc), fillI: 0.7,
+      rim: new THREE.Color(0xffffff), rimI: 0.3,
+      starsOpacity: 0,
+      shieldLight: new THREE.Color(0xfff8e0), shieldLightI: 0.6,
+      bgTint: new THREE.Color(0xffffff)
+    },
+    oscuro: {
+      skyTop: new THREE.Color(0x03050e), skyBottom: new THREE.Color(0x162447),
+      sunColor: new THREE.Color(0xcdd8ff), sunPos: new THREE.Vector3(4, 10, -10),
+      ambient: new THREE.Color(0x1a2c4a), ambientI: 0.5,
+      dir: new THREE.Color(0x88a2ff), dirI: 0.7,
+      fill: new THREE.Color(0x223355), fillI: 0.4,
+      rim: new THREE.Color(0x4fa3e8), rimI: 0.6,
+      starsOpacity: 1,
+      shieldLight: new THREE.Color(0xbcd4ff), shieldLightI: 2.6,
+      bgTint: new THREE.Color(0x141a33)
+    }
+  };
+
+  // Luz dedicada al escudo: compensa el ambiente oscuro
+  const shieldLight = new THREE.PointLight(0xffffff, 0, 7);
+  shieldLight.position.set(0.6, 1.4, 2.4);
+  scene.add(shieldLight);
+
+  // ══════ FONDO DE ARENALES — imagen real que cubre toda la pantalla,
+  // tintada según el ambiente elegido (claro/oscuro) ══════
+  const bgTexture = textureLoader.load('./FONDO.png'); // ← CAMBIA por tu imagen
+  bgTexture.encoding = THREE.sRGBEncoding;
+
+  function makeBgPlaneGeometry(distance){
+    const vFov = camera.fov * Math.PI / 180;
+    const visibleHeight = 2 * Math.tan(vFov/2) * distance;
+    const visibleWidth = visibleHeight * camera.aspect;
+    return new THREE.PlaneGeometry(visibleWidth * 1.15, visibleHeight * 1.15);
+  }
+
+  const BG_DISTANCE = 20;
+  const bgMat = new THREE.MeshBasicMaterial({ map: bgTexture, color: 0xffffff, transparent: true, depthWrite: false });
+  const bgPlane = new THREE.Mesh(makeBgPlaneGeometry(BG_DISTANCE), bgMat);
+  bgPlane.position.set(0, 0, -BG_DISTANCE); // posición LOCAL: siempre delante de la cámara
+  bgPlane.renderOrder = -2;
+  bgPlane.visible = false; // aparece recién cuando se rompe la piedra (ver finishReveal)
+  camera.add(bgPlane);
+  scene.add(camera); // necesario para que Three.js renderice los hijos de la cámara
+
+  function resizeBgPlane(){
+    bgPlane.geometry.dispose();
+    bgPlane.geometry = makeBgPlaneGeometry(BG_DISTANCE);
+  }
+
+  // Transición suave entre temas (se llama cada frame, interpola hacia el tema activo)
+  let targetAmbientTheme = AMBIENT_THEMES.claro;
+  const ambientMix = {
+    skyTop: AMBIENT_THEMES.claro.skyTop.clone(), skyBottom: AMBIENT_THEMES.claro.skyBottom.clone(),
+    sunColor: AMBIENT_THEMES.claro.sunColor.clone(), sunPos: AMBIENT_THEMES.claro.sunPos.clone(),
+    ambientColor: AMBIENT_THEMES.claro.ambient.clone(), ambientI: AMBIENT_THEMES.claro.ambientI,
+    dirColor: AMBIENT_THEMES.claro.dir.clone(), dirI: AMBIENT_THEMES.claro.dirI,
+    fillColor: AMBIENT_THEMES.claro.fill.clone(), fillI: AMBIENT_THEMES.claro.fillI,
+    rimColor: AMBIENT_THEMES.claro.rim.clone(), rimI: AMBIENT_THEMES.claro.rimI,
+    starsOpacity: AMBIENT_THEMES.claro.starsOpacity,
+    shieldLightColor: AMBIENT_THEMES.claro.shieldLight.clone(), shieldLightI: AMBIENT_THEMES.claro.shieldLightI,
+    bgTintColor: AMBIENT_THEMES.claro.bgTint.clone()
+  };
+  const AMBIENT_LERP_SPEED = 0.025;
+
+  window.setAmbientTheme = function(name){
+    targetAmbientTheme = AMBIENT_THEMES[name] || AMBIENT_THEMES.claro;
+    document.querySelectorAll('.mode-option').forEach(b => {
+      b.classList.toggle('active', b.dataset.theme === name);
+    });
+    const menu = document.getElementById('mode-menu');
+    if (menu) menu.classList.remove('open');
+  };
+
+  window.toggleModeMenu = function(){
+    const menu = document.getElementById('mode-menu');
+    if (menu) menu.classList.toggle('open');
+  };
+
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('ambient-switch');
+    const menu = document.getElementById('mode-menu');
+    if (!wrap || !menu || !menu.classList.contains('open')) return;
+    if (!wrap.contains(e.target)) menu.classList.remove('open');
+  });
+
+  function updateAmbientTheme(){
+    const s = AMBIENT_LERP_SPEED;
+    ambientMix.ambientColor.lerp(targetAmbientTheme.ambient, s);
+    ambientMix.ambientI += (targetAmbientTheme.ambientI - ambientMix.ambientI) * s;
+    ambientMix.dirColor.lerp(targetAmbientTheme.dir, s);
+    ambientMix.dirI += (targetAmbientTheme.dirI - ambientMix.dirI) * s;
+    ambientMix.fillColor.lerp(targetAmbientTheme.fill, s);
+    ambientMix.fillI += (targetAmbientTheme.fillI - ambientMix.fillI) * s;
+    ambientMix.rimColor.lerp(targetAmbientTheme.rim, s);
+    ambientMix.rimI += (targetAmbientTheme.rimI - ambientMix.rimI) * s;
+    ambientMix.shieldLightColor.lerp(targetAmbientTheme.shieldLight, s);
+    ambientMix.shieldLightI += (targetAmbientTheme.shieldLightI - ambientMix.shieldLightI) * s;
+    ambientMix.bgTintColor.lerp(targetAmbientTheme.bgTint, s);
+
+    ambientLight.color.copy(ambientMix.ambientColor);
+    ambientLight.intensity = ambientMix.ambientI;
+    dirLight.color.copy(ambientMix.dirColor);
+    dirLight.intensity = ambientMix.dirI;
+    fillDir.color.copy(ambientMix.fillColor);
+    fillDir.intensity = ambientMix.fillI;
+    rimLight.color.copy(ambientMix.rimColor);
+    rimLight.intensity = ambientMix.rimI;
+    shieldLight.color.copy(ambientMix.shieldLightColor);
+    shieldLight.intensity = ambientMix.shieldLightI;
+    bgMat.color.copy(ambientMix.bgTintColor);
+  }
 
   function makeParticles(count, spread, color, size, opacity) {
     const pos=new Float32Array(count*3), base=new Float32Array(count*3), off=new Float32Array(count*3);
@@ -87,8 +207,17 @@
   floorGroup.position.y = -1.8;
   scene.add(floorGroup);
 
+  /* ═══════════════════════════════════════════════════════════════
+     PIEDRAS — geometría de icosaedro deformada con ondas seno/coseno
+     (no vértices al azar), en varios tonos de gris/tierra, escaladas
+     de forma dispareja en cada eje para que ninguna se vea repetida.
+  ═══════════════════════════════════════════════════════════════ */
   const rockColors = [0x5a5450, 0x4a463f, 0x6b6259, 0x3c3936, 0x756a5c, 0x474138];
 
+  /* makeRock acepta un tercer parámetro opcional "texture".
+     Si se pasa una textura, el material la usa como "map" y el color
+     se deja en blanco para no teñir la foto; si no se pasa, funciona
+     con color plano. */
   function makeRock(size, color, texture) {
     const geo = new THREE.IcosahedronGeometry(size, 2);
     const pos = geo.attributes.position;
@@ -121,9 +250,16 @@
     return rock;
   }
 
+  /* ═══════════════════════════════════════════════════════════════
+     PIEDRAS DEL PISO — reparto circular desde el centro: piedras
+     "grandes" (ROCK_COUNT) y gravilla chica (GRAVEL_COUNT) mezcladas.
+     Cada una gira y se balancea muy despacio sobre sí misma
+     (velocidad, eje y fase al azar).
+  ═══════════════════════════════════════════════════════════════ */
   const ROCK_COUNT = 70;
   const GRAVEL_COUNT = 90;
   let floorPopulated = false;
+  const floorRocks = []; // { mesh, spinX, spinY, spinZ, baseY, phase, bobSpeed, bobAmp }
   function populateFloor(){
     if (floorPopulated) return;
     floorPopulated = true;
@@ -133,9 +269,20 @@
       const size = 0.045 + Math.pow(Math.random(), 2.2) * 0.32;
       const color = rockColors[Math.floor(Math.random() * rockColors.length)];
       const rock = makeRock(size, color);
-      rock.position.set(Math.cos(angle) * radius, -size * 0.4 + Math.random() * 0.03, Math.sin(angle) * radius);
+      const baseY = -size * 0.4 + Math.random() * 0.03;
+      rock.position.set(Math.cos(angle) * radius, baseY, Math.sin(angle) * radius);
       rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       floorGroup.add(rock);
+      floorRocks.push({
+        mesh: rock,
+        spinX: (Math.random()-0.5) * 0.10,
+        spinY: (Math.random()-0.5) * 0.10,
+        spinZ: (Math.random()-0.5) * 0.10,
+        baseY,
+        phase: Math.random() * Math.PI * 2,
+        bobSpeed: 0.15 + Math.random() * 0.15,
+        bobAmp: size * (0.05 + Math.random() * 0.05)
+      });
     }
     for (let i = 0; i < GRAVEL_COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -143,13 +290,36 @@
       const size = 0.015 + Math.random() * 0.04;
       const color = rockColors[Math.floor(Math.random() * rockColors.length)];
       const rock = makeRock(size, color);
-      rock.position.set(Math.cos(angle) * radius, -size * 0.3, Math.sin(angle) * radius);
+      const baseY = -size * 0.3;
+      rock.position.set(Math.cos(angle) * radius, baseY, Math.sin(angle) * radius);
       rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       floorGroup.add(rock);
+      floorRocks.push({
+        mesh: rock,
+        spinX: (Math.random()-0.5) * 0.10,
+        spinY: (Math.random()-0.5) * 0.10,
+        spinZ: (Math.random()-0.5) * 0.10,
+        baseY,
+        phase: Math.random() * Math.PI * 2,
+        bobSpeed: 0.15 + Math.random() * 0.15,
+        bobAmp: size * (0.05 + Math.random() * 0.05)
+      });
+    }
+  }
+  // Giro lento y constante sobre sí misma + un leve vaivén vertical
+  // (bobbing), ambos con velocidad muy baja para que se note "vivo"
+  // sin llamar la atención de más.
+  function updateFloorRocks(t){
+    for (let i = 0; i < floorRocks.length; i++){
+      const r = floorRocks[i];
+      r.mesh.rotation.x += r.spinX * 0.016;
+      r.mesh.rotation.y += r.spinY * 0.016;
+      r.mesh.rotation.z += r.spinZ * 0.016;
+      r.mesh.position.y = r.baseY + Math.sin(t * r.bobSpeed + r.phase) * r.bobAmp;
     }
   }
 
-  const targetRock = makeRock(0.85, 0x4a463f, rockTexture);
+  const targetRock = makeRock(0.85, 0x4a463f);
   targetRock.position.set(0, -1.35, 0);
   scene.add(targetRock);
 
@@ -164,7 +334,8 @@
     const fragCount = 18 + Math.floor(Math.random()*8);
     for (let i=0; i<fragCount; i++){
       const size = 0.05 + Math.random()*0.16;
-      const frag = makeRock(size, rockColors[Math.floor(Math.random()*rockColors.length)], rockTexture);
+      const color = rockColors[Math.floor(Math.random()*rockColors.length)];
+      const frag = makeRock(size, color);
       frag.position.copy(origin);
       frag.material = frag.material.clone();
       frag.material.transparent = true;
@@ -198,7 +369,7 @@
   }
 
   const shieldGroup = new THREE.Group();
-  shieldGroup.position.set(0, -0.4, 0);
+  shieldGroup.position.set(0, -0.8, 0);
   scene.add(shieldGroup);
   let shieldModel = null, shieldBaseScale = 1, shieldReady = false;
   new THREE.GLTFLoader().load(SHIELD_MODEL, gltf => {
@@ -269,6 +440,7 @@
   const introHintEl  = document.getElementById('intro-hint');
   const hintCountEl  = document.getElementById('hint-count');
   const decoMundo = document.getElementById('deco-mundo');
+  const decoAmbient = document.getElementById('ambient-switch');
 
   function updateHintCount(){
     if (!hintCountEl) return;
@@ -418,7 +590,9 @@
     if (msgLeftEl) msgLeftEl.classList.add('show');
     if (msgRightEl) msgRightEl.classList.add('show');
     populateFloor();
+    bgPlane.visible = true;
     if (decoMundo) decoMundo.classList.remove('hidden');
+    if (decoAmbient) decoAmbient.classList.remove('hidden');
     canvas.style.cursor = 'grab';
   }
 
@@ -486,11 +660,16 @@
 
     r1.rotation.z+=.003; r2.rotation.z-=.002; r3.rotation.z+=.0015;
     animP(p1,t,.4,.3,.35); animP(p2,t,.25,.2,.3); animP(p3,t,.18,.15,.22);
+    updateFloorRocks(t);
+
+    updateAmbientTheme();
+
     renderer.render(scene,camera);
   })();
 
   window.addEventListener('resize',()=>{
     camera.aspect=W()/H(); camera.updateProjectionMatrix(); renderer.setSize(W(),H());
+    resizeBgPlane();
   });
 
   /* ══════════════════════════════════════════
@@ -708,8 +887,9 @@
       sc.add(cloud);
     }
 
-    const corruColors = ['#8a8a8a', '#7a5a4a', '#9c9c9c', '#6f4d3c'];
-    const adobeColors  = ['#b98f68', '#a97e57', '#c2a077'];
+    const corruColors = ['#8a8a8a', '#7a5a4a', '#9c9c9c', '#6f4d3c', '#8f5a3c', '#5c4a42', '#9a4a38'];
+    const adobeColors  = ['#b98f68', '#a97e57', '#c2a077', '#e6e1d2', '#cdd3d5', '#a7b39a', '#d8d2c2'];
+    const roofColors   = ['#8f8f95', '#8a4a3a', '#6d5850', '#9c9c9c', '#7a5a4a'];
 
     function addAdobeHouse(x, z, w, h, d){
       const grp = new THREE.Group();
@@ -719,7 +899,7 @@
       wall.position.y = h/2;
       wall.castShadow = true; wall.receiveShadow = true;
       grp.add(wall);
-      const roofTex = makeCorrugatedTexture('#8f8f95');
+      const roofTex = makeCorrugatedTexture(roofColors[Math.floor(Math.random()*roofColors.length)]);
       const roof = new THREE.Mesh(new THREE.BoxGeometry(w*1.12, 0.12, d*1.12), new THREE.MeshStandardMaterial({ map:roofTex, roughness:0.85, metalness:0.1 }));
       roof.position.y = h + 0.06;
       grp.add(roof);
@@ -823,11 +1003,91 @@
       sc.add(wall);
     }
 
+    function addBarrels(x,z,count){
+      const barrelColors = [0x14140f, 0x1c1c18, 0x2a2620, 0x1a1e22];
+      for (let i=0;i<count;i++){
+        const col = i % 4, row = Math.floor(i/4);
+        const mat = new THREE.MeshStandardMaterial({ color: barrelColors[i % barrelColors.length], roughness:0.75, metalness:0.3 });
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.34,0.78,12), mat);
+        barrel.position.set(x + col*0.72, 0.39, z - row*0.72);
+        barrel.rotation.y = Math.random()*Math.PI;
+        barrel.castShadow = true; barrel.receiveShadow = true;
+        sc.add(barrel);
+      }
+    }
+
+    function makePuddleTexture(){
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(64,64,4,64,64,62);
+      grad.addColorStop(0, 'rgba(120,108,86,0.95)');
+      grad.addColorStop(0.55, 'rgba(96,88,70,0.85)');
+      grad.addColorStop(1, 'rgba(96,88,70,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.ellipse(64,64,62,44,0,0,Math.PI*2); ctx.fill();
+      return new THREE.CanvasTexture(c);
+    }
+    const puddleTex = makePuddleTexture();
+    function addPuddle(x,z,scale){
+      const puddle = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.2*scale, 1.5*scale),
+        new THREE.MeshStandardMaterial({ map: puddleTex, transparent:true, roughness:0.15, metalness:0.2, depthWrite:false })
+      );
+      puddle.rotation.x = -Math.PI/2;
+      puddle.rotation.z = Math.random()*Math.PI;
+      puddle.position.set(x, 0.012, z);
+      sc.add(puddle);
+    }
+
+    function makeFenceTexture(){
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0,0,128,128);
+      ctx.strokeStyle = 'rgba(170,175,180,0.85)';
+      ctx.lineWidth = 2.4;
+      const step = 16;
+      for (let i=-128;i<256;i+=step){
+        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+128,128); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(i,128); ctx.lineTo(i+128,0); ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      return tex;
+    }
+    const fenceTex = makeFenceTexture();
+    function addFence(x,z,w,h,rotY){
+      const tex = fenceTex.clone();
+      tex.needsUpdate = true;
+      tex.repeat.set(Math.max(1, Math.round(w*1.6)), 1);
+      const fence = new THREE.Mesh(
+        new THREE.PlaneGeometry(w,h),
+        new THREE.MeshStandardMaterial({ map: tex, transparent:true, side: THREE.DoubleSide, roughness:0.8 })
+      );
+      fence.position.set(x, h/2, z);
+      fence.rotation.y = rotY || 0;
+      sc.add(fence);
+      const postMat = new THREE.MeshStandardMaterial({ color:0x3a3a3a });
+      const halfW = w/2;
+      [-halfW, halfW].forEach(off=>{
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,h,6), postMat);
+        post.position.set(x + Math.sin(rotY||0)*off, h/2, z + Math.cos(rotY||0)*off);
+        sc.add(post);
+      });
+    }
+
     addEntranceHouse(-6.5, -2, 4.4, 2.7, 5.2);
     addAntennaPole(-8.6, -0.5, 8.5);
     addSign(-1.4, 1.2, 0x2f6b3c);
     addUnfinishedBrick(6.8, -1.8, 3.6, 2.1, 3.6);
     addTruck(3.4, -4, Math.PI*0.08, 0xd8cfa8);
+    addBarrels(-8.8, 2.5, 8);
+    addFence(-8.6, -8, 12, 1.7, 0);
+    addFence(8.4, -6, 9, 1.7, 0);
+    addPuddle(1.6, -18, 1.3);
+    addPuddle(-2.4, -66, 1.6);
+    addPuddle(2.8, -140, 1.1);
 
     addAdobeHouse(-5.2, -10,  3.4, 2.6, 4.2);
     addAdobeHouse( 5.4, -14,  3.0, 2.4, 3.6);
@@ -1222,16 +1482,30 @@
 
   if (mundoCloseBtn) mundoCloseBtn.addEventListener('click', closePanel);
 
+  /* ── Botón "Procesos" del menú: lleva directo a la carpeta 3dExtraccion,
+     donde están los modelos de la planta (molienda, secadora, mesas, etc). ── */
+  const popProcesos = document.getElementById('pop-procesos');
+  if (popProcesos){
+    popProcesos.addEventListener('click', () => {
+      window.location.href = './3dExtraccion/extraccion.html';
+    });
+  }
+
   /* ── Si venimos de "volver" desde Extracción o Galería (?mundo=1 en la
      URL), saltamos toda la intro y abrimos el Mundo directamente. ── */
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('mundo') === '1'){
-    introState = 'done';
-    hitsDone = PICK_HITS;
-    targetRock.visible = false;
-    hideHint();
-    finishReveal();
-    openPanel('mundo');
-  }
-
+if (urlParams.get('mundo') === '1'){
+  introState = 'done';
+  hitsDone = PICK_HITS;
+  targetRock.visible = false;
+  hideHint();
+  finishReveal();
+  openPanel('mundo');
+} else if (urlParams.get('skipIntro') === '1'){
+  introState = 'done';
+  hitsDone = PICK_HITS;
+  targetRock.visible = false;
+  hideHint();
+  finishReveal();
+}
 })();

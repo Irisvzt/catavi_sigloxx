@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════
+   MENÚ FLOTANTE (basado en el modelo "Micro-Interaction Menu")
+   Arriba a la derecha · 3 botones con ícono y nombre:
+   1) Modo  → abanico de círculos negros (Claro / Oscuro)
+   2) Menú  → caja desplegable (Historia / Galería)
+   3) Mundo → entra al mundo caminable
+═══════════════════════════════════════════════ */
+
+.menu-dock {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 12;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+/* CATAVI.js agrega/quita la clase "hidden" (id="deco-mundo") */
+.menu-dock.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-14px);
+}
+
+.menu-dock .wrapper {
+  width: 224px;
+  height: 52px;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.281), 0 8px 22px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Botón base: ícono arriba, nombre abajo ── */
+.menu-dock .mbtn {
+  width: 60px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  cursor: pointer;
+  color: #2b2b2b;
+}
+.menu-dock .micon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.menu-dock .mlabel {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  line-height: 1;
+  font-weight: 700;
+  color: #1f1f1f;
+  transition: color 0.2s;
+}
+.menu-dock .mbtn:hover .mlabel,
+.menu-dock .mbtn.open .mlabel { color: #000; }
+
+.menu-dock .sv {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Botón 1: Modo (sol / luna) ── */
+.menu-dock .theme-icon .sv {
+  position: absolute;
+  transition: opacity 0.25s, transform 0.35s, color 0.2s;
+}
+.menu-dock .theme-icon .ico-sun  { opacity: 1; transform: rotate(0) scale(1); }
+.menu-dock .theme-icon .ico-moon { opacity: 0; transform: rotate(-70deg) scale(0.4); }
+.menu-dock #dock-theme.is-dark .ico-sun  { opacity: 0; transform: rotate(70deg) scale(0.4); }
+.menu-dock #dock-theme.is-dark .ico-moon { opacity: 1; transform: rotate(0) scale(1); }
+.menu-dock #dock-theme:hover .sv,
+.menu-dock #dock-theme.open .sv { color: #000; }
+
+/* ── Botón 2: Menú (ícono de lista del modelo) ── */
+.menu-dock .linee {
+  display: block;
+  width: 20px;
+  height: 3px;
+  background: #2b2b2b;
+  margin-top: 3px;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+.menu-dock .linee1 { width: 15px; transform: translateX(5px); }
+.menu-dock .linee1::before {
+  content: "";
+  display: block;
+  transform: translateX(-5px);
+  width: 3px;
+  height: 3px;
+  background: #2b2b2b;
+  transition: width 0.2s ease 0.1s, transform 0.2s;
+}
+.menu-dock .linee3 { width: 13px; }
+.menu-dock .linee3::after {
+  content: "";
+  display: block;
+  transform: translateX(17px);
+  width: 0;
+  height: 3px;
+  background: #2b2b2b;
+  transition: width 0.2s ease 0.1s;
+}
+.menu-dock #dock-menu:hover .linee,
+.menu-dock #dock-menu.open .linee,
+.menu-dock #dock-menu:hover .linee1::before,
+.menu-dock #dock-menu.open .linee1::before,
+.menu-dock #dock-menu:hover .linee3::after,
+.menu-dock #dock-menu.open .linee3::after { background: #000; }
+.menu-dock #dock-menu:hover .linee1,
+.menu-dock #dock-menu.open .linee1 { width: 10px; transform: translateX(0); }
+.menu-dock #dock-menu:hover .linee1::before,
+.menu-dock #dock-menu.open .linee1::before { width: 0; transform: translateX(0); }
+.menu-dock #dock-menu:hover .linee3,
+.menu-dock #dock-menu.open .linee3 { width: 15px; }
+.menu-dock #dock-menu:hover .linee3::after,
+.menu-dock #dock-menu.open .linee3::after { width: 3px; }
+
+/* ── Botón 3: Mundo (círculo gris con ícono) ── */
+.menu-dock .add-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  color: #fff;
+  transition: background 0.3s ease, transform 0.2s;
+}
+.menu-dock .add-circle .sv { width: 15px; height: 15px; }
+.menu-dock #dock-mundo:hover .add-circle { background: #111; transform: scale(1.08); }
+.menu-dock #dock-mundo:active .add-circle { transform: scale(0.94); }
+
+/* ── Abanico del botón 1: círculos NEGROS (Claro / Oscuro) ── */
+.menu-dock .fan { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 1; }
+.menu-dock .fan-item {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35);
+  transform: scale(0);
+  visibility: hidden;
+  transition: transform 0.1s cubic-bezier(0.23, -0.47, 0.58, -0.63), visibility 0s 0.1s;
+}
+.menu-dock .fan-item .sv { width: 21px; height: 21px; }
+.menu-dock #fan-claro   { left: -6px; top: 64px; }
+.menu-dock #fan-oscuro  { left: 44px; top: 86px; }
+.menu-dock .fan.open .fan-item {
+  transform: scale(1);
+  visibility: visible;
+  transition: transform 0.5s cubic-bezier(0.23, -0.47, 0.58, -0.63), visibility 0s;
+}
+.menu-dock .fan.open #fan-oscuro { transition-delay: 0.1s; }
+.menu-dock .fan.open .fan-item:hover { transform: scale(1.1); transition-duration: 0.1s; }
+.menu-dock .fan-item.active { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #111; }
+
+/* ── Caja desplegable del botón 2 (Historia / Galería) ── */
+.menu-dock .drop {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.226), 0 8px 22px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 8px;
+  visibility: hidden;
+  transition: max-height 0.2s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.15s, padding 0.2s, visibility 0s 0.2s;
+  z-index: 1;
+}
+.menu-dock .drop.open {
+  max-height: 140px;
+  opacity: 1;
+  padding: 8px;
+  visibility: visible;
+  transition: max-height 0.2s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.15s, padding 0.2s, visibility 0s;
+}
+.menu-dock .drop-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: none;
+  outline: none;
+  background: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #111;
+  text-align: left;
+  transition: background 0.15s;
+}
+.menu-dock .drop-item .sv { width: 19px; height: 19px; color: #2b2b2b; }
+.menu-dock .drop-item:hover { background: #ededed; }
+.menu-dock .drop-item:hover .sv { color: #000; }
+
+.menu-dock .mbtn:focus-visible,
+.menu-dock .fan-item:focus-visible,
+.menu-dock .drop-item:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+/* En pantallas angostas el título de la intro bajaría hasta chocar con el menú: se lo baja un poco */
+@media (max-width: 1180px) {
+  .intro-reveal { padding-top: 96px; }
+  .header-block { margin-top: 96px; }
+}
+@media (max-width: 640px) {
+  .menu-dock { top: 10px; right: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-dock, .menu-dock * { transition-duration: 0.01s !important; transition-delay: 0s !important; animation: none !important; }
+}

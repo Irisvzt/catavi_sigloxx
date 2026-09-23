@@ -6,6 +6,7 @@
 <title>Cooperativa Multiactiva Siglo XX Catavi</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="stylesheet" href="CATAVI.css">
+<link rel="stylesheet" href="menu/menu.css">
 </head>
 <body>
 <div id="cc">
@@ -50,20 +51,42 @@
     </div>
   </div>
 
-  <!-- BOTÓN ÚNICO: MUNDO -->
-  <div class="side-deco center hidden" id="deco-mundo">
-    <button class="ficon-btn" onclick="openPanel('mundo')" id="fbtn-mundo">
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs><linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#88ccff"/><stop offset="100%" stop-color="#1a5a9a"/></linearGradient></defs>
-        <circle cx="32" cy="32" r="26" fill="url(#gM)" opacity="0.9"/>
-        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55"/>
-        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55" transform="rotate(60 32 32)"/>
-        <ellipse cx="32" cy="32" rx="26" ry="11" fill="none" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55" transform="rotate(120 32 32)"/>
-        <line x1="6" y1="32" x2="58" y2="32" stroke="#0a1a3a" stroke-width="1.4" opacity="0.55"/>
-        <circle cx="32" cy="32" r="26" fill="none" stroke="#dff0ff" stroke-width="1.3"/>
-      </svg>
-      <span class="flabel">Mundo</span>
-    </button>
+  <!-- ══════════ MENÚ FLOTANTE (arriba a la derecha) ══════════
+       (el id "deco-mundo" debe quedarse: CATAVI.js lo usa para mostrar/ocultar el menú) -->
+  <div class="menu-dock hidden" id="deco-mundo">
+
+    <div class="wrapper">
+      <!-- Botón 1: Modo (claro / oscuro) -->
+      <button class="mbtn" id="dock-theme" aria-label="Modo" aria-haspopup="true" aria-expanded="false">
+        <span class="micon theme-icon"><svg class="sv ico-sun" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656z"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg><svg class="sv ico-moon" viewBox="0 0 24 24"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg></span>
+        <span class="mlabel">Modo</span>
+      </button>
+
+      <!-- Botón 2: Menú (Historia y Galería) -->
+      <button class="mbtn" id="dock-menu" aria-label="Menú" aria-haspopup="true" aria-expanded="false">
+        <span class="micon"><span class="linee linee1"></span><span class="linee linee2"></span><span class="linee linee3"></span></span>
+        <span class="mlabel">Menú</span>
+      </button>
+
+      <!-- Botón 3: Mundo -->
+      <button class="mbtn" id="dock-mundo" aria-label="Entrar al Mundo">
+        <span class="micon add-circle"><svg class="sv" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg></span>
+        <span class="mlabel">Mundo</span>
+      </button>
+    </div>
+
+    <!-- Abanico del botón 1 -->
+    <div class="fan" id="fan-modo">
+      <button class="fan-item" id="fan-claro" data-theme="claro" title="Modo claro" aria-label="Modo claro"><svg class="sv" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656z"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg></button>
+      <button class="fan-item" id="fan-oscuro" data-theme="oscuro" title="Modo oscuro" aria-label="Modo oscuro"><svg class="sv" viewBox="0 0 24 24"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg></button>
+    </div>
+
+    <!-- Caja desplegable del botón 2 -->
+    <div class="drop" id="dock-drop">
+      <button class="drop-item" id="pop-historia"><svg class="sv" viewBox="0 0 24 24"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Historia</span></button>
+      <button class="drop-item" id="pop-galeria"><svg class="sv" viewBox="0 0 24 24"><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></svg><span>Galería</span></button>
+      <button class="drop-item" id="pop-procesos"><svg class="sv" viewBox="0 0 24 24"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Procesos</span></button>
+    </div>
   </div>
 
   <!-- ══════════════════════════════════════════════ -->
@@ -87,10 +110,12 @@
  <script type="module" src="CATAVI.js"></script>
 </div><!-- #cc -->
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fflate@0.6.9/umd/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+<script src="menu/menu.js"></script>
 
 </body>
 </html>
