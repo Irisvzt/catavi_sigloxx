@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooperativa Multiactiva Siglo XX Catavi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="CATAVI.css">
+<link rel="stylesheet" href="menu/menu.css">
+</head>
+<body>
+<div id="cc">
+  <canvas id="tc"></canvas>
+
+  <!-- ═════════ INTRO: el minero camina, pica la roca y revela el nombre ═════════ -->
+  <div id="intro-layer">
+    <div class="intro-reveal" id="intro-title">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+    <div class="intro-hint" id="intro-hint">
+      <div class="hint-icon">⛏️</div>
+      <div class="hint-text">Toca la piedra para romperla</div>
+      <div class="hint-sub">También puedes arrastrarla y lanzarla ✋</div>
+      <div class="hint-count" id="hint-count"></div>
+    </div>
+  </div>
+
+  <div class="ui-overlay">
+    <div class="header-block" id="site-header">
+      <div class="sup">Llallagua · Potosí · Bolivia</div>
+      <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+      <div class="tag">Fundada en la fuerza del pueblo minero</div>
+    </div>
+    <div class="side-message left" id="msg-left">
+      <div class="mag-h">Quiénes Somos</div>
+      <p>Organización boliviana nacida en Llallagua, Potosí, que reúne el trabajo minero, comercial y social de sus socios bajo un modelo cooperativo, solidario y democrático.</p>
+    </div>
+
+    <div class="side-message right" id="msg-right">
+      <div class="mag-h">Nuestro Compromiso</div>
+      <p>Preservar el legado minero boliviano e impulsar el desarrollo integral de la comunidad a través de la participación activa de cada socio.</p>
+    </div>
+
+    <div class="site-message" id="site-message">
+      <div class="mag-eyebrow">
+        <span class="mag-num">N° 01 · LLALLAGUA</span>
+        <span class="mag-line"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MENÚ FLOTANTE (arriba a la derecha) ══════════
+       (el id "deco-mundo" debe quedarse: CATAVI.js lo usa para mostrar/ocultar el menú) -->
+  <div class="menu-dock hidden" id="deco-mundo">
+
+    <div class="wrapper">
+      <!-- Botón 1: Modo (claro / oscuro) -->
+      <button class="mbtn" id="dock-theme" aria-label="Modo" aria-haspopup="true" aria-expanded="false">
+        <span class="micon theme-icon"><svg class="sv ico-sun" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656z"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg><svg class="sv ico-moon" viewBox="0 0 24 24"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg></span>
+        <span class="mlabel">Modo</span>
+      </button>
+
+      <!-- Botón 2: Menú (Historia y Galería) -->
+      <button class="mbtn" id="dock-menu" aria-label="Menú" aria-haspopup="true" aria-expanded="false">
+        <span class="micon"><span class="linee linee1"></span><span class="linee linee2"></span><span class="linee linee3"></span></span>
+        <span class="mlabel">Menú</span>
+      </button>
+
+      <!-- Botón 3: Mundo -->
+      <button class="mbtn" id="dock-mundo" aria-label="Entrar al Mundo">
+        <span class="micon add-circle"><svg class="sv" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg></span>
+        <span class="mlabel">Mundo</span>
+      </button>
+    </div>
+
+    <!-- Abanico del botón 1 -->
+    <div class="fan" id="fan-modo">
+      <button class="fan-item" id="fan-claro" data-theme="claro" title="Modo claro" aria-label="Modo claro"><svg class="sv" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656z"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg></button>
+      <button class="fan-item" id="fan-oscuro" data-theme="oscuro" title="Modo oscuro" aria-label="Modo oscuro"><svg class="sv" viewBox="0 0 24 24"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg></button>
+    </div>
+
+    <!-- Caja desplegable del botón 2 -->
+    <div class="drop" id="dock-drop">
+      <button class="drop-item" id="pop-historia"><svg class="sv" viewBox="0 0 24 24"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg><span>Historia</span></button>
+      <button class="drop-item" id="pop-galeria"><svg class="sv" viewBox="0 0 24 24"><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></svg><span>Galería</span></button>
+      <button class="drop-item" id="pop-procesos"><svg class="sv" viewBox="0 0 24 24"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg><span>Procesos</span></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PANTALLA COMPLETA: MUNDO INTERACTIVO            -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="mundo-screen" id="mundo-screen">
+    <button class="cbtn mundo-close" id="mundo-close" title="Cerrar"><i class="ti ti-x"></i></button>
+    <div class="mundo-title">
+      <div class="mundo-title-sup">Cooperativa Multiactiva Siglo XX Catavi</div>
+      <div class="mundo-title-main">Mundo · Llallagua, Potosí</div>
+    </div>
+    <canvas id="canvas-mundo"></canvas>
+    <div class="world-hint" id="world-hint">Camina con las flechas / WASD</div>
+    <div class="world-dpad" id="world-dpad">
+      <button class="wd-up"    id="wd-up">▲</button>
+      <button class="wd-left"  id="wd-left">◀</button>
+      <button class="wd-right" id="wd-right">▶</button>
+      <button class="wd-down"  id="wd-down">▼</button>
+    </div>
+  </div>
+ <script type="module" src="CATAVI.js"></script>
+</div><!-- #cc -->
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.6.9/umd/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+<script src="menu/menu.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mundo caminable - Cooperativa Siglo XX Catavi</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #9ec5e8; font-family: system-ui, sans-serif; }
+  canvas { display: block; }
+  #ayuda {
+    position: fixed; left: 16px; bottom: 16px;
+    padding: 8px 14px; border: 1px solid rgba(0,0,0,.35); border-radius: 999px;
+    background: rgba(255,255,255,.8); color: #222; font-size: 14px;
+  }
+  #aviso {
+    position: fixed; top: 16px; left: 16px; max-width: 320px;
+    padding: 8px 12px; border-radius: 8px; background: rgba(120,30,20,.9);
+    color: #fff; font-size: 13px; display: none;
+  }
+</style>
+</head>
+<body>
+<div id="ayuda">W A S D o flechas para caminar</div>
+<div id="aviso"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- fflate va ANTES de FBXLoader (sin él da "fflate is not defined") -->
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.7.3/umd/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+// ================== CONFIGURACIÓN ==================
+const RUTA_SUELO    = './TEXTURA DE ARENA.jpg';   // textura del piso
+const RUTA_MONTANAS = './MONTAÑAS.png';           // imagen de fondo
+const TAMANO        = 2000;   // el terreno mide 2000 x 2000
+const REPETICIONES  = 100;    // veces que se repite la textura del piso
+const RADIO_FONDO   = 900;
+const ALTO_FONDO    = 400;
+const BAJAR_FONDO   = 100;   // cuánto se baja el fondo: más número = montañas más abajo (prueba 60 a 160)
+const VELOCIDAD     = 8;      // unidades por segundo
+const GIRO          = 2.2;    // radianes por segundo
+
+// --- Personaje ---
+const RUTA_PERSONAJE    = './P CAMINANDO.fbx';  // tu modelo con la animación de caminar
+const ALTURA_PERSONAJE  = 3.5;     // altura final en el mundo (se escala solo)
+const ORIENTACION       = 0;       // si camina de espaldas, pon Math.PI
+const VELOCIDAD_ANIMACION = 1;     // sube si los pies patinan, baja si se ven muy rápidos
+const SUAVIZADO_BUCLE   = 0.2;     // 0.2 = el último 20% del ciclo se funde con el inicio (0 = desactivado)
+
+// --- Casas (4) ---
+// Orden de la lista: 0 = casa izquierda del fondo, 1 = casa derecha, 2 = CASA IZQUIERDA (nueva), 3 = CASA DERECHA (nueva)
+const CASAS = [
+  './CASA 1.glb',           // 0: izquierda (la más atrás)
+  './CASA 2.glb',           // 1: derecha (la más adelante)
+  './CASA IZQUIERDA.glb',   // 2: ahora va a la DERECHA, al frente de la casa 1   👈 cambia la extensión si no es .glb
+  './CASA DERECHA.glb'      // 3: ahora va a la IZQUIERDA, al frente de la casa 0   👈 cambia la extensión si no es .glb
+];
+const TAMANO_CASA     = 18;    // largo de cada casa (se escala sola)
+const DISTANCIA_CALLE = 26;    // distancia del centro de la calle a cada casa
+const Z_CASA_DER      = 40;    // la derecha va más al fondo (número mayor = más lejos de ti)
+const Z_CASA_IZQ      = 15;    // la izquierda queda más cerca de ti (más atrás)
+const ADELANTE_NUEVAS = -27;   // posición de cada casa nueva respecto a la vieja de su lado: negativo = más cerca de ti (atrás), positivo = más al fondo
+const ROTACION_IZQ    = 0;           // giro de las casas de la izquierda (prueba 0, Math.PI/2, Math.PI, -Math.PI/2)
+const ROTACION_DER    = Math.PI;     // giro de las casas de la derecha
+const ROTACION_NUEVA_IZQ = ROTACION_IZQ;  // giro de la casa nueva que va a la izquierda (si queda de espaldas, prueba Math.PI)
+const ROTACION_NUEVA_DER = ROTACION_DER;  // giro de la casa nueva que va a la derecha
+// Giro extra por modelo (en el mismo orden de la lista CASAS). Sirve cuando UN modelo trae la puerta al otro lado.
+// Prueba para cada casa: 0, Math.PI, Math.PI / 2, -Math.PI / 2
+const GIRO_EXTRA_POR_MODELO = [0, 0, 0, Math.PI];   // [CASA 1, CASA 2, CASA IZQUIERDA, CASA DERECHA]
+// Tamaño (largo) de cada modelo, en el mismo orden de la lista CASAS. Cambia solo el número de la casa que quieras.
+const TAMANO_POR_MODELO = [25, 25, 35, 25];   // [CASA 1, CASA 2, CASA IZQUIERDA, CASA DERECHA]
+// Altura extra por modelo: positivo la sube, negativo la hunde. Úsalo si una casa aún queda flotando o hundida.
+const ALTURA_EXTRA_POR_MODELO = [0, 0, 0, 0];   // [CASA 1, CASA 2, CASA IZQUIERDA, CASA DERECHA]
+
+// ================== ESCENA BASE ==================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x9ec5e8);
+scene.fog = new THREE.Fog(0xc9b8a0, 150, 700);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 2000);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+function avisar(msg) {
+  const a = document.getElementById('aviso');
+  a.textContent = msg;
+  a.style.display = 'block';
+}
+
+// ================== LUCES ==================
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a7a66, 0.85));
+const sol = new THREE.DirectionalLight(0xfff2d6, 0.9);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+const s = sol.shadow.camera;
+s.left = -40; s.right = 40; s.top = 40; s.bottom = -40; s.near = 1; s.far = 250;
+scene.add(sol, sol.target);
+
+// ================== PISO ==================
+const matSuelo = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0 });
+new THREE.TextureLoader().load(
+  RUTA_SUELO,
+  (tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(REPETICIONES, REPETICIONES);
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    tex.encoding = THREE.sRGBEncoding;
+    matSuelo.map = tex;
+    matSuelo.needsUpdate = true;
+  },
+  undefined,
+  () => {
+    matSuelo.color.set(0x8b6f4e);
+    avisar('No se encontró ' + RUTA_SUELO + '. Revisa el nombre y la carpeta de la imagen del piso.');
+  }
+);
+
+const suelo = new THREE.Mesh(new THREE.PlaneGeometry(TAMANO, TAMANO), matSuelo);
+suelo.rotation.x = -Math.PI / 2;
+suelo.receiveShadow = true;
+scene.add(suelo);
+
+// ================== FONDO DE MONTAÑAS ==================
+const matFondo = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide, fog: false, depthWrite: false });
+new THREE.TextureLoader().load(
+  RUTA_MONTANAS,
+  (tex) => {
+    tex.encoding = THREE.sRGBEncoding;
+    tex.wrapS = THREE.MirroredRepeatWrapping;
+    const anchoImagen = ALTO_FONDO * (tex.image.width / tex.image.height);
+    const vueltas = (2 * Math.PI * RADIO_FONDO) / anchoImagen;
+    tex.repeat.x = Math.max(2, 2 * Math.round(vueltas / 2)); // número par: el empalme no se nota
+    matFondo.map = tex;
+    matFondo.needsUpdate = true;
+
+    // La niebla toma el color de la base de las montañas: el piso se funde con ellas, sin franja
+    try {
+      const cv = document.createElement('canvas');
+      cv.width = 32; cv.height = 100;
+      const cx = cv.getContext('2d');
+      cx.drawImage(tex.image, 0, 0, 32, 100);
+      const fila = Math.min(99, Math.max(0, Math.round((1 - BAJAR_FONDO / ALTO_FONDO) * 100)));
+      const d = cx.getImageData(0, fila, 32, 1).data;
+      let r = 0, g = 0, b = 0;
+      for (let i = 0; i < 32; i++) { r += d[i * 4]; g += d[i * 4 + 1]; b += d[i * 4 + 2]; }
+      scene.fog.color.setRGB(r / 32 / 255, g / 32 / 255, b / 32 / 255).convertSRGBToLinear();
+    } catch (e) { console.warn('No se pudo igualar el color de la niebla:', e); }
+  },
+  undefined,
+  () => {
+    matFondo.color.set(0x6f8aa8);
+    avisar('No se encontró ' + RUTA_MONTANAS + '. Revisa el nombre y la carpeta de la imagen de montañas.');
+  }
+);
+
+const fondo = new THREE.Mesh(
+  new THREE.CylinderGeometry(RADIO_FONDO, RADIO_FONDO, ALTO_FONDO, 64, 1, true),
+  matFondo
+);
+fondo.position.y = ALTO_FONDO / 2 - BAJAR_FONDO;
+fondo.renderOrder = -1;
+scene.add(fondo);
+
+// ================== PERSONAJE PROVISIONAL (solo si tu modelo no carga) ==================
+const jugador = new THREE.Group();
+const mat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8 });
+
+const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.45), mat(0x2f5d8a));
+torso.position.y = 1.3; torso.castShadow = true;
+
+const cabeza = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), mat(0xd9a77c));
+cabeza.position.y = 2.1; cabeza.castShadow = true;
+
+const casco = new THREE.Mesh(
+  new THREE.SphereGeometry(0.33, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xf2c200)
+);
+casco.position.y = 2.13; casco.castShadow = true;
+
+const linterna = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.1, 0.1), mat(0xffffff));
+linterna.position.set(0, 2.25, 0.32);
+
+const piernaIzq = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.8, 0.28), mat(0x333a45));
+const piernaDer = piernaIzq.clone();
+piernaIzq.geometry.translate(0, -0.4, 0);
+piernaDer.geometry = piernaIzq.geometry;
+piernaIzq.position.set(-0.2, 0.85, 0);
+piernaDer.position.set(0.2, 0.85, 0);
+piernaIzq.castShadow = piernaDer.castShadow = true;
+
+const provisional = new THREE.Group();
+provisional.add(torso, cabeza, casco, linterna, piernaIzq, piernaDer);
+jugador.add(provisional);
+scene.add(jugador);
+
+// ================== TU MODELO 3D ==================
+let mixer = null;
+let accionCaminar = null;
+let huesoCadera = null;
+let modeloGrupo = null;
+const baseCadera = new THREE.Vector3();
+const _v = new THREE.Vector3();
+
+const ES_RAIZ_POS = /(hips|root|pelvis|armature).*\.position$/i;
+
+// Deja la cadera fija en horizontal (x, z) y conserva la altura (y):
+// así la animación no empuja al cuerpo hacia adelante por su cuenta.
+function bloquearCadera() {
+  jugador.updateMatrixWorld(true);
+  huesoCadera.getWorldPosition(_v);
+  modeloGrupo.worldToLocal(_v);
+  _v.x = baseCadera.x;
+  _v.z = baseCadera.z;
+  modeloGrupo.localToWorld(_v);
+  huesoCadera.parent.worldToLocal(_v);
+  huesoCadera.position.copy(_v);
+}
+
+// Funde el último tramo del clip con su primer fotograma, para que al
+// reiniciar el bucle no haya un salto de pose (el "tirón" cada 4 pasos).
+function cerrarBucle(clip, fraccion) {
+  if (fraccion <= 0) return;
+  const L = clip.duration * fraccion;
+  const q0 = new THREE.Quaternion(), q1 = new THREE.Quaternion();
+
+  clip.tracks.forEach((t) => {
+    if (ES_RAIZ_POS.test(t.name)) return;          // la cadera ya va bloqueada aparte
+    const size = t.getValueSize(), v = t.values, tm = t.times, n = tm.length;
+    if (n < 3) return;
+    const T = tm[n - 1];
+
+    for (let i = 0; i < n; i++) {
+      if (tm[i] < T - L) continue;
+      const w = (tm[i] - (T - L)) / L;             // 0 → 1 en el último tramo
+      const k = w * w * (3 - 2 * w);               // suavizado
+      if (size === 4) {                            // rotaciones (quaternions)
+        q0.fromArray(v, 0);
+        q1.fromArray(v, i * 4);
+        q1.slerp(q0, k);
+        q1.toArray(v, i * 4);
+      } else {
+        for (let j = 0; j < size; j++) v[i * size + j] += (v[j] - v[i * size + j]) * k;
+      }
+    }
+  });
+}
+
+new THREE.FBXLoader().load(
+  RUTA_PERSONAJE,
+  (obj) => {
+    // 1. Escalar a la altura deseada
+    const caja = new THREE.Box3().setFromObject(obj);
+    obj.scale.setScalar(ALTURA_PERSONAJE / (caja.max.y - caja.min.y));
+
+    // 2. Apoyar los pies sobre el piso
+    caja.setFromObject(obj);
+    obj.position.y -= caja.min.y;
+
+    // 3. Sombras, colores correctos y que no desaparezca al moverse
+    obj.traverse((m) => {
+      if (!m.isMesh) return;
+      m.castShadow = true;
+      m.frustumCulled = false;
+      [].concat(m.material).forEach((mt) => { if (mt && mt.map) mt.map.encoding = THREE.sRGBEncoding; });
+    });
+
+    // 4. Animación de caminar
+    if (obj.animations.length) {
+      const clip = obj.animations.find((c) => /walk|camin/i.test(c.name)) || obj.animations[0];
+      console.log('Animación:', clip.name, '| duración:', clip.duration.toFixed(2), 's');
+      cerrarBucle(clip, SUAVIZADO_BUCLE);
+
+      mixer = new THREE.AnimationMixer(obj);
+      accionCaminar = mixer.clipAction(clip);
+      accionCaminar.play();
+      accionCaminar.paused = true;   // se activa solo al caminar
+    } else {
+      avisar('El modelo cargó, pero ' + RUTA_PERSONAJE + ' no trae animaciones.');
+    }
+
+    // 5. Orientación y reemplazo del personaje provisional
+    const modelo = new THREE.Group();
+    modelo.rotation.y = ORIENTACION;
+    modelo.add(obj);
+    jugador.add(modelo);
+    jugador.remove(provisional);
+
+    // 6. Bloqueo de cadera
+    if (mixer) {
+      modeloGrupo = modelo;
+      mixer.update(0);
+      jugador.updateMatrixWorld(true);
+
+      let primero = null;
+      obj.traverse((h) => {
+        if (!h.isBone) return;
+        if (!primero) primero = h;
+        if (!huesoCadera && /hips|pelvis/i.test(h.name)) huesoCadera = h;
+      });
+      huesoCadera = huesoCadera || primero;
+
+      if (huesoCadera) {
+        huesoCadera.getWorldPosition(baseCadera);
+        modelo.worldToLocal(baseCadera);
+        console.log('Cadera bloqueada en el hueso:', huesoCadera.name);
+      }
+    }
+  },
+  undefined,
+  (err) => {
+    console.error(err);
+    avisar('No se pudo cargar ' + RUTA_PERSONAJE + '. Revisa el nombre y la carpeta (mira la consola con F12).');
+  }
+);
+
+// ================== CASAS A LOS COSTADOS ==================
+function cargarModelo(ruta) {
+  return new Promise((resolve, reject) => {
+    const ext = ruta.split('.').pop().toLowerCase();
+    if (ext === 'fbx') new THREE.FBXLoader().load(ruta, resolve, undefined, reject);
+    else new THREE.GLTFLoader().load(ruta, (g) => resolve(g.scene), undefined, reject);
+  });
+}
+
+// Escala la casa, la centra y apoya su base en el piso.
+// La base se calcula con el 2% de vértices más bajos, así una pieza suelta bajo la casa no la deja flotando.
+function prepararCasa(obj, tamano) {
+  const caja = new THREE.Box3().setFromObject(obj);
+  const tam = caja.getSize(new THREE.Vector3());
+  obj.scale.multiplyScalar(tamano / Math.max(tam.x, tam.z));
+
+  caja.setFromObject(obj);
+  const centro = caja.getCenter(new THREE.Vector3());
+  obj.position.x -= centro.x;
+  obj.position.z -= centro.z;
+  obj.updateMatrixWorld(true);
+
+  const ys = [];
+  const v = new THREE.Vector3();
+  obj.traverse((m) => {
+    if (!m.isMesh || !m.visible || !m.geometry.attributes.position) return;
+    const pos = m.geometry.attributes.position;
+    const salto = Math.max(1, Math.floor(pos.count / 4000));
+    for (let i = 0; i < pos.count; i += salto) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld);
+      ys.push(v.y);
+    }
+  });
+  ys.sort((p, q) => p - q);
+  const base = ys.length ? ys[Math.floor(ys.length * 0.02)] : caja.min.y;
+  obj.position.y -= base;
+
+  obj.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+  const grupo = new THREE.Group();
+  grupo.add(obj);
+  return grupo;
+}
+
+Promise.allSettled(CASAS.map(cargarModelo)).then((resultados) => {
+  const bases = resultados.map((r, i) => {
+    if (r.status === 'fulfilled') return prepararCasa(r.value, TAMANO_POR_MODELO[i] || TAMANO_CASA);
+    console.error(r.reason);
+    avisar('No se pudo cargar la casa ' + CASAS[i] + ' (revisa el nombre y la extensión).');
+    return null;
+  });
+
+  const colocar = (indice, x, z, giro) => {
+    if (!bases[indice]) return;
+    const casa = bases[indice].clone(true);
+    casa.position.set(x, ALTURA_EXTRA_POR_MODELO[indice] || 0, z);
+    casa.rotation.y = giro + (GIRO_EXTRA_POR_MODELO[indice] || 0);
+    scene.add(casa);
+  };
+
+  // lado izquierdo: casa del fondo y, más adelante, CASA DERECHA
+  colocar(0, -DISTANCIA_CALLE, Z_CASA_IZQ, ROTACION_IZQ);
+  colocar(3, -DISTANCIA_CALLE, Z_CASA_IZQ + ADELANTE_NUEVAS, ROTACION_NUEVA_IZQ);
+
+  // lado derecho: casa adelantada y, más adelante, CASA IZQUIERDA
+  colocar(1, DISTANCIA_CALLE, Z_CASA_DER, ROTACION_DER);
+  colocar(2, DISTANCIA_CALLE, Z_CASA_DER + ADELANTE_NUEVAS, ROTACION_NUEVA_DER);
+});
+
+// ================== CONTROLES ==================
+const teclas = {};
+addEventListener('keydown', (e) => { teclas[e.code] = true; });
+addEventListener('keyup',   (e) => { teclas[e.code] = false; });
+const hay = (...codes) => codes.some((c) => teclas[c]);
+
+let angulo = 0;
+const LIMITE = TAMANO / 2 - 20;
+let paso = 0;
+
+camera.position.set(0, 6, -13);
+
+// ================== BUCLE ==================
+const reloj = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(reloj.getDelta(), 0.05);
+
+  if (hay('KeyA', 'ArrowLeft'))  angulo += GIRO * dt;
+  if (hay('KeyD', 'ArrowRight')) angulo -= GIRO * dt;
+
+  let avance = 0;
+  if (hay('KeyW', 'ArrowUp'))   avance =  1;
+  if (hay('KeyS', 'ArrowDown')) avance = -0.6;
+
+  jugador.rotation.y = angulo;
+  const dx = Math.sin(angulo), dz = Math.cos(angulo);
+  jugador.position.x = THREE.MathUtils.clamp(jugador.position.x + dx * avance * VELOCIDAD * dt, -LIMITE, LIMITE);
+  jugador.position.z = THREE.MathUtils.clamp(jugador.position.z + dz * avance * VELOCIDAD * dt, -LIMITE, LIMITE);
+
+  // animación de tu modelo
+  if (mixer) {
+    if (accionCaminar) {
+      accionCaminar.paused = (avance === 0);
+      accionCaminar.timeScale = avance * VELOCIDAD_ANIMACION;
+    }
+    mixer.update(dt);
+    if (huesoCadera) bloquearCadera();
+  } else {
+    // personaje provisional
+    if (avance !== 0) {
+      paso += dt * 9;
+      piernaIzq.rotation.x =  Math.sin(paso) * 0.6;
+      piernaDer.rotation.x = -Math.sin(paso) * 0.6;
+      torso.position.y = 1.3 + Math.abs(Math.sin(paso)) * 0.04;
+    } else {
+      piernaIzq.rotation.x *= 0.85;
+      piernaDer.rotation.x *= 0.85;
+    }
+  }
+
+  // cámara detrás del personaje
+  const objetivo = new THREE.Vector3(
+    jugador.position.x - dx * 13,
+    6,
+    jugador.position.z - dz * 13
+  );
+  camera.position.lerp(objetivo, 1 - Math.pow(0.001, dt));
+  camera.lookAt(jugador.position.x, 2.5, jugador.position.z);
+
+  // el fondo y el sol acompañan al jugador
+  fondo.position.x = camera.position.x;
+  fondo.position.z = camera.position.z;
+  sol.position.set(jugador.position.x + 50, 80, jugador.position.z + 30);
+  sol.target.position.copy(jugador.position);
+
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
