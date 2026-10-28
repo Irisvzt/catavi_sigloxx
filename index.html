@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cooperativa Multiactiva Siglo XX Catavi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Lato:wght@400;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { width:100%; height:100%; overflow:hidden; background:#04080f; }
@@ -26,13 +29,29 @@
     content:''; position:absolute; inset:-170px -130px -170px -8vw; z-index:-1;
     background:radial-gradient(ellipse closest-side at 50% 50%, rgba(4,8,15,.8) 0%, rgba(4,8,15,.58) 45%, rgba(4,8,15,0) 100%);
   }
-  .hero .sup { font-family:'Courier New',monospace; font-size:11px; letter-spacing:4px; color:#4fa3e8; text-transform:uppercase; margin-bottom:10px; }
-  .hero h1 { font-family:'Georgia',serif; font-size:clamp(30px,3.6vw,50px); font-weight:700; line-height:1.2; color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.9); }
-  .hero h1 span { color:#4fa3e8; }
-  .hero .tag { font-family:'Courier New',monospace; font-size:11px; letter-spacing:2px; color:rgba(255,255,255,.55); margin-top:10px; }
+  .hero .sup { font-family:'Oswald','Arial Narrow',sans-serif; font-size:14px; font-weight:500; letter-spacing:2px; color:#7cc8ff; text-transform:uppercase; margin-bottom:10px; }
+
+  /* Título: fuente muy gruesa y apretada, blanco, con "Siglo XX" en celeste */
+  .hero h1 {
+    font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+    font-size:clamp(30px,3.6vw,50px); font-weight:900; letter-spacing:-0.03em; line-height:1.1;
+    color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.9);
+  }
+  .hero h1 > span:not(.t3d),            /* antes de que titulo.js lo procese */
+  .hero h1 .t3d__cara span { color:#7cc8ff; }   /* celeste */
+
+  /* Título con profundidad 3D (lo anima titulo.js) */
+  .t3d { display:inline-block; perspective:900px; perspective-origin:50% 48%; isolation:isolate; }
+  .t3d__stage { position:relative; display:inline-grid; transform-style:preserve-3d; transform-origin:50% 50%; will-change:transform; }
+  .t3d__capa, .t3d__cara { grid-area:1/1; display:inline-block; white-space:nowrap; user-select:none; transform-style:preserve-3d; backface-visibility:hidden; text-shadow:none; }
+  .t3d__capa { position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .t3d__capa--fondo { text-shadow:0 .18em .32em rgba(0,0,0,.55); }
+  .hero h1 .t3d__capa span { color:var(--c2); }
+  .t3d__cara { position:relative; z-index:1; color:#fff; transform:translateZ(.6px); text-shadow:0 .035em .07em rgba(0,0,0,.35); }
+  .hero .tag { font-family:'Lato','Segoe UI',Arial,sans-serif; font-size:15px; color:rgba(255,255,255,.75); margin-top:10px; }
   .hero .msg { margin-top:22px; padding-top:16px; border-top:1px solid rgba(255,255,255,.28); }
-  .hero .msg h2 { font-family:'Georgia',serif; font-size:15px; letter-spacing:.3px; text-transform:uppercase; color:#fff; margin-bottom:6px; }
-  .hero .msg p { font-family:sans-serif; font-size:14px; line-height:1.7; color:rgba(255,255,255,.88); text-shadow:0 1px 8px rgba(0,0,0,.7); margin-bottom:14px; }
+  .hero .msg h2 { font-family:'Oswald','Arial Narrow',sans-serif; font-size:17px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; color:#fff; margin-bottom:6px; }
+  .hero .msg p { font-family:'Lato','Segoe UI',Arial,sans-serif; font-size:15px; line-height:1.7; color:rgba(255,255,255,.88); text-shadow:0 1px 8px rgba(0,0,0,.7); margin-bottom:14px; }
 
   /* Escudo (derecha) */
   #escudo {
@@ -42,50 +61,68 @@
   }
   #escudo:active { cursor:grabbing; }
 
+  /* Botones: negro difuminado */
   .btn-explorar {
-    pointer-events:auto; margin-top:8px; cursor:pointer; border:none; border-radius:26px;
-    font-family:'Courier New',monospace; font-size:13px; letter-spacing:3px; text-transform:uppercase;
-    color:#04080f; background:#dff0ff; padding:13px 30px; box-shadow:0 0 20px rgba(79,163,232,.55);
-    transition:background .2s, transform .2s;
+    pointer-events:auto; margin-top:8px; cursor:pointer; border:1px solid rgba(255,255,255,.14); border-radius:999px;
+    font-family:'Oswald','Arial Narrow',sans-serif; font-size:15px; font-weight:500; letter-spacing:.6px; text-transform:uppercase;
+    color:#fff; background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); padding:13px 30px;
+    transition:background .2s;
   }
-  .btn-explorar:hover { background:#fff; transform:translateY(-2px); }
-  .btn-volver {
-    position:fixed; top:18px; left:18px; z-index:8; display:none; cursor:pointer;
-    font-family:'Courier New',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase;
-    color:#dff0ff; background:rgba(4,8,15,.6); border:1px solid rgba(79,163,232,.45);
-    border-radius:20px; padding:9px 18px;
+  .btn-explorar:hover { background:rgba(0,0,0,.65); }
+  .b-redondo, .btn-volver {
+    width:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    color:#fff; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.14); border-radius:50%;
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    transition:background .2s;
   }
-  body.explorando .btn-volver { display:block; }
+  .b-redondo:hover, .btn-volver:hover { background:rgba(0,0,0,.65); }
+  .btn-volver { position:fixed; top:18px; left:18px; z-index:8; display:none; }
+  body.explorando .btn-volver { display:flex; }
+  .b-redondo svg, .btn-volver svg, .panel svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   body.explorando .hero, body.explorando #escudo { opacity:0 !important; pointer-events:none; transition:opacity .7s ease, transform 1.1s ease; }
 
-  /* Navegación (arriba a la derecha): Historia · Galería · Procesos */
+  /* Barra de botones (arriba a la derecha): galería · momento del día · menú */
   .nav {
     position:fixed; top:20px; right:24px; z-index:8; display:flex; gap:10px;
     opacity:0; transition:opacity 1.2s ease 1.2s;
   }
   .nav.show { opacity:1; }
-  .nav a {
-    font-family:'Courier New',monospace; font-size:11px; letter-spacing:2.5px; text-transform:uppercase;
-    text-decoration:none; color:#dff0ff; background:rgba(4,8,15,.55);
-    border:1px solid rgba(79,163,232,.5); border-radius:22px; padding:10px 20px;
-    transition:background .2s, color .2s, transform .2s;
+  .caja { position:relative; }
+  .panel {
+    display:none; position:absolute; top:calc(100% + 10px); right:0; min-width:180px; padding:6px;
+    flex-direction:column; gap:2px; background:rgba(0,0,0,.5); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.14); border-radius:16px;
   }
-  .nav a:hover { background:#dff0ff; color:#04080f; transform:translateY(-2px); }
+  .panel.abierto { display:flex; }
+  .panel a, .panel .op {
+    display:flex; align-items:center; gap:12px; padding:10px 14px; border:0; border-radius:10px;
+    background:none; cursor:pointer; text-align:left; text-decoration:none; color:#fff;
+    font-family:'Oswald','Arial Narrow',sans-serif; font-size:14px; font-weight:500; letter-spacing:.6px; text-transform:uppercase;
+  }
+  .panel a:hover, .panel .op:hover { background:rgba(255,255,255,.14); }
+  .panel .op.activo { background:rgba(255,255,255,.2); }
 
   .desierto-hint {
     position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:6;
-    font-family:'Courier New',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase;
-    color:rgba(223,240,255,.9); background:rgba(4,8,15,.55); border:1px solid rgba(79,163,232,.35);
-    padding:7px 14px; border-radius:16px; white-space:nowrap;
+    display:flex; align-items:center; gap:5px;
+    font-family:'Oswald','Arial Narrow',sans-serif; font-size:14px; font-weight:500; letter-spacing:.5px; text-transform:uppercase;
+    color:#fff; background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.14);
+    padding:9px 20px 9px 10px; border-radius:999px; white-space:nowrap;
     opacity:0; transition:opacity .6s ease; pointer-events:none;
   }
+  /* tecla negra (como la "E" del aviso) */
+  .tecla {
+    display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px; padding:0 6px;
+    border-radius:6px; background:#000; color:#fff; border:1px solid rgba(255,255,255,.3);
+    font:500 14px 'Oswald','Arial Narrow',sans-serif; letter-spacing:0;
+  }
+  .desierto-hint .tecla + span { margin-left:5px; }
   .desierto-hint.show { opacity:1; }
   @media (hover:none) { .desierto-hint { display:none; } }
 
   /* Celular / pantalla angosta: texto arriba, escudo abajo al centro */
   @media (max-width: 900px) {
     .nav { top:12px; right:12px; gap:6px; }
-    .nav a { font-size:10px; letter-spacing:1.5px; padding:8px 12px; }
     .hero { left:20px; top:70px; width:calc(100% - 40px); transform:translateY(-10px); }
     .hero.show { transform:none; }
     .hero::before { inset:-70px -40px; background:radial-gradient(ellipse closest-side at 50% 50%, rgba(4,8,15,.75) 0%, rgba(4,8,15,.6) 60%, rgba(4,8,15,0) 100%); }
@@ -100,7 +137,7 @@
 
 <div class="hero" id="hero">
   <div class="sup">Llallagua · Potosí · Bolivia</div>
-  <h1>Cooperativa Multiactiva<br><span>Siglo XX</span> Catavi</h1>
+  <h1 data-titulo3d>Cooperativa<br>Multiactiva<br><span>Siglo XX</span> Catavi</h1>
   <div class="tag">Fundada en la fuerza del pueblo minero</div>
   <div class="msg">
     <h2>Quiénes Somos</h2>
@@ -110,22 +147,43 @@
   <button class="btn-explorar" id="btn-explorar">Explorar más</button>
 </div>
 
-<button class="btn-volver" id="btn-volver">← Volver</button>
+<button class="btn-volver" id="btn-volver" aria-label="Volver" title="Volver"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg></button>
 
-<nav class="nav" id="nav">
-  <a href="historia/historia.html">Historia</a>
-  <a href="3dGaleria/galeria.html">Galería</a>
-  <a href="3dExtraccion/extraccion.html">Procesos</a>
-</nav>
+<div class="nav" id="nav">
+  <button type="button" class="b-redondo" id="btn-galeria" aria-label="Galería" title="Galería"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg></button>
+  <div class="caja">
+    <button type="button" class="b-redondo" id="btn-tiempo" aria-label="Momento del día" title="Momento del día" aria-expanded="false"><svg viewBox="0 0 24 24" id="icono-tiempo"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+    <div class="panel" id="panel-tiempo">
+      <button type="button" class="op activo" data-tema="claro"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Día</button>
+      <button type="button" class="op" data-tema="atardecer"><svg viewBox="0 0 24 24"><path d="M6 17a6 6 0 0 1 12 0"/><path d="M2 17h20M12 6v3M4.9 9.9l1.6 1.6M19.1 9.9l-1.6 1.6M7 21h10"/></svg>Atardecer</button>
+      <button type="button" class="op" data-tema="oscuro"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>Noche</button>
+    </div>
+  </div>
+  <div class="caja">
+    <button type="button" class="b-redondo" id="btn-menu" aria-label="Menú" title="Menú" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="panel" id="panel-menu">
+      <a href="historia/historia.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historia</a>
+      <a href="3dGaleria/galeria.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg>Galería</a>
+      <a href="3dExtraccion/extraccion.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Procesos</a>
+    </nav>
+  </div>
+</div>
 <canvas id="escudo"></canvas>
-<div class="desierto-hint" id="desierto-hint">W A S D / flechas para caminar</div>
+<div class="desierto-hint" id="desierto-hint"><span class="tecla">W</span><span class="tecla">A</span><span class="tecla">S</span><span class="tecla">D</span><span>o flechas para caminar</span></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fflate@0.6.9/umd/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
 <script src="desierto.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/OutlinePass.js"></script>
 <script src="escudo.js"></script>
+<script src="titulo.js"></script>
 <script>
   // Al entrar: aparece el mundo, luego el nombre y el escudo
   window.addEventListener('load', function () {
@@ -144,6 +202,45 @@
     document.body.classList.remove('explorando');
     if (window.Desierto) window.Desierto.volver();
   });
+
+  // Menú y momento del día (día · atardecer · noche)
+  (function () {
+    var btnMenu = document.getElementById('btn-menu'), panelMenu = document.getElementById('panel-menu');
+    var btnTiempo = document.getElementById('btn-tiempo'), panelTiempo = document.getElementById('panel-tiempo');
+    var iconoTiempo = document.getElementById('icono-tiempo');
+
+    function cerrar() {
+      panelMenu.classList.remove('abierto');
+      panelTiempo.classList.remove('abierto');
+      btnMenu.setAttribute('aria-expanded', 'false');
+      btnTiempo.setAttribute('aria-expanded', 'false');
+    }
+    function alternar(panel, boton) {
+      var estabaAbierto = panel.classList.contains('abierto');
+      cerrar();
+      if (!estabaAbierto) {
+        panel.classList.add('abierto');
+        boton.setAttribute('aria-expanded', 'true');
+      }
+      boton.blur();   // para que Enter/E sigan sirviendo para el juego
+    }
+    btnMenu.addEventListener('click', function (e) { e.stopPropagation(); alternar(panelMenu, btnMenu); });
+    btnTiempo.addEventListener('click', function (e) { e.stopPropagation(); alternar(panelTiempo, btnTiempo); });
+    document.addEventListener('click', function (e) { if (!e.target.closest('.caja')) cerrar(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
+
+    var opciones = panelTiempo.querySelectorAll('.op');
+    opciones.forEach(function (op) {
+      op.addEventListener('click', function () {
+        if (window.Desierto) window.Desierto.setTema(op.getAttribute('data-tema'));
+        opciones.forEach(function (o) { o.classList.remove('activo'); });
+        op.classList.add('activo');
+        iconoTiempo.innerHTML = op.querySelector('svg').innerHTML;
+        cerrar();
+        op.blur();
+      });
+    });
+  })();
 </script>
 </body>
 </html>
